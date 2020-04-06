@@ -199,7 +199,7 @@ function addURL(sid, url) {
         }
     });
 
-    xhr.open("POST", "http://192.168.0.35:8080/downloadstation/V4/Task/AddUrl");
+    xhr.open("POST", "http://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/AddUrl");
     xhr.setRequestHeader("User-Agent", "Qget 1.4.0 rv:80 (iPhone; iOS 13.3.1; fr_FR)");
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
     console.log(xhr);
