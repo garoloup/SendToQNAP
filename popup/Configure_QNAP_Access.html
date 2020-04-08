@@ -9,19 +9,87 @@
   <body>
       <p>QNAP Settings</p>
   <form>
-      <label> Address</label>
-      <input class="NASSetting" type="text" id="NASaddress" ><br />
+    <table style="width:90%">
+      <tr>
+        <td>
+          <label> Address</label>
+        </td>
+        <td>
+          <input class="NASSetting" type="text" id="NASaddress" ><br />
+        </td>
+      </tr>
+
+      <tr>
+        <td>
       <label> Port</label>
+    </td>
+    <td>
       <input class="NASSetting" type="text" id="NASport" ><br />
+    </td>
+  </tr>
+
+  <tr>
+    <td>
        <label> Login</label>
+     </td>
+     <td>
       <input class="NASSetting" type="text" id="NASlogin" ><br />
+    </td>
+  </tr>
+
+  <tr>
+    <td>
       <label> Password</label>
+    </td>
+    <td>
       <input class="NASSetting" type="password" id="NASpassword" ><br />
+    </td>
+  </tr>
+
+  <tr>
+    <td>
       <label> Directory</label>
+    </td>
+    <td>
       <input class="NASSetting" type="text" id="NASdir" ><br />
+    </td>
+  </tr>
+
+
+    </table>
      <button type="submit">Save</button>
   </form>
-    <script src="Configure_QNAP_Access.js"></script>
-  </body>
+  <hr>
+  <button id="testConnectionButton">test Connection</button>
+  <div>
+  <label id="NASInfo">Unknown</label>
+  </div>
+  <hr>
 
-</html> 
+  <button id="NASrefresh">Refresh Download Jobs</button>
+  <div>
+  <label id="NASDNLJobNb"> ? Jobs in queue </label>
+  </div>
+<table class="NASItemTable" id="NASDownloadTable" style="width:95%">
+  <tr>
+    <th scope="col" width="85%">Filename </th>
+    <th scope="col" width="15%">%
+        <button class="Btn3D" type="button">X</button>
+    </th>
+  </tr>
+
+</table>
+
+
+<div>
+  <ul id="NASDownloadList">
+
+  </ul>
+    <script src="Configure_QNAP_Access.js"></script>
+    <script src="ListDownload.js"></script>
+    <script src="xmlToJson.js"></script>
+</div>
+
+</body>
+
+</html>

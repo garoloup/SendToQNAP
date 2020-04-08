@@ -1,17 +1,60 @@
 
 html, body {
-  width: 200px;
+  font-size: 0.9em;
 }
 
 .NASSetting  {
   margin: 3% auto;
-  padding: 4px;
+  padding: 2px;
   text-align: center;
-  font-size: 0.5em;
+  font-size: 0.9em;
   background-color: #E5F2F2;
   cursor: pointer;
 }
 
 .NASSetting:hover {
   background-color: #CFF2F2;
+}
+
+ table#NASDownloadTable   {
+  border: 1px solid black;
+  font-size: 0.7em;
+}
+
+progress{
+    display: inline-block;
+    -moz-box-sizing: border-box;
+         box-sizing: border-box;
+    width: 30px;
+    height: 10px;
+}
+
+.Btn3D {
+	background:#cc0000;
+	font:bold ;
+	border-radius:50%;
+	color:#fff;
+
+    border: 0;
+  	border-radius:50%;
+    font-size: 0.7rem;
+    text-align: center;
+    color: #fff;
+    text-shadow: -1px -1px 1px #000;
+    background-color: rgba(220, 0, 0, 1);
+    background-image: linear-gradient(to top left,
+                                      rgba(0, 0, 0, .2),
+                                      rgba(0, 0, 0, .2) 30%,
+                                      rgba(0, 0, 0, 0));
+    box-shadow: inset 2px 2px 3px rgba(255, 255, 255, .6),
+                inset -2px -2px 3px rgba(0, 0, 0, .6);
+}
+
+.boutonDelete:hover {
+    background-color: rgba(255, 0, 0, 1);
+}
+
+.boutonDelete:active {
+    box-shadow: inset -2px -2px 3px rgba(255, 255, 255, .6),
+                inset 2px 2px 3px rgba(0, 0, 0, .6);
 }

@@ -77,25 +77,12 @@ var NASport = "80";
 var NASlogin = "";
 var NASpassword = "";
 var NASdir = "";
+var NASsid = "";
 
 function onError(error) {
     console.log(`Error: ${error}`);
   }
 
-/* +++++++++++++++++++++++++++++++++
-Load stored QNAP settings to local vars
-*/
-/*function initialize() {
-//  var gettingAllStorageItems = browser.storage.local.get(null);
-  var gettingAllStorageItems = chrome.storage.local.get(null);
-  gettingAllStorageItems.then((res) => {
-      NASaddr = res.NASaddress;
-      NASport = res.NASport;
-      NASlogin = res.NASlogin;
-      NASpassword = res.NASpassword;
-      NASdir = res.NASdir;
-  }, onError);
-}*/
 
 function initialize() {
 //  var gettingAllStorageItems = browser.storage.local.get(null);
@@ -143,32 +130,48 @@ function LoadAndLogAndAddUrl(url) {
   });
 }
 
+function notifyExtension(url) {
+  console.log("content script sending message: "+url);
+  browser.runtime.sendMessage({"url": url});
+}
+
+
 /* +++++++++++++++++++++++++++++++++
- Login into NAS and get SID for next step
+Login into NAS and get SID for next step
 */
 function LogAndAddUrl(url) {
-    var data = "";
+  var data = "";
+
+  // cannot share SID in that way
+  if (true) //(NASsid.length == 0)
+  {
     var xhr = new XMLHttpRequest();
 
     data = "user="+NASlogin+"&pass="+btoa(NASpassword);
     console.log("param login ="+data);
     xhr.withCredentials = true;
 
-xhr.addEventListener("readystatechange", function() {
-  if(this.readyState === 4) {
-    console.log(this.responseText);
-      var obj = JSON.parse(this.responseText);
-      console.log("SID="+obj.sid);
-      addURL(obj.sid,url);
-  }
-});
+    xhr.addEventListener("readystatechange", function() {
+        if(this.readyState === 4) {
+          console.log(this.responseText);
+          var obj = JSON.parse(this.responseText);
+          console.log("SID="+obj.sid);
+          NASsid = obj.sid;
+          addURL(obj.sid,url);
+        }
+    });
 
-console.log("Lancement QNAP get SID");
-xhr.open("POST", "http://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login");
+    console.log("Lancement QNAP get SID");
+    xhr.open("POST", "http://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login");
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-xhr.setRequestHeader("User-Agent", "Qget 1.4.0 rv:80 (iPhone; iOS 13.3.1; fr_FR)");
+    xhr.setRequestHeader("User-Agent", "Qget 1.4.0 rv:80 (iPhone; iOS 13.3.1; fr_FR)");
 
-xhr.send(data);
+    xhr.send(data);
+  }
+  else {
+    console.log("SID "+NASsid+" already avaialble")
+    addURL(NASsid,url);
+  }
 }
 
 /* +++++++++++++++++++++++++++++++++

@@ -2,19 +2,18 @@
 
   "manifest_version": 2,
   "name": "SendToQnap",
-  "version": "1.6",
+  "version": "1.8",
   "description": "Send a url to QNAP downloadstation",
   "default_locale": "en",
   "browser_specific_settings": {
     "gecko": {
-      "strict_min_version": "56.0a1"
+      "strict_min_version": "57.0"
     }
   },
 
   "icons": {
     "48": "icons/48_download.png",
-    "96": "icons/96_download.png",
-    "128": "icons/128_download.png"
+    "96": "icons/96_download.png"
   },
 
     "options_ui": {
@@ -41,9 +40,9 @@
     "default_popup": "popup/Configure_QNAP_Access.html"
   },
 
+
 "background":  {
   "scripts": ["SendLink.js"]
     }
-
 
 }
