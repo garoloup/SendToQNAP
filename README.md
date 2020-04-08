@@ -1,5 +1,6 @@
 # SendToQNAP
 Manage Download station from browser:
-- configure IP & port, login and password of your QNAP 
-- Use right lick on URL to send it to download station
-
+- Configure IP & port, login and password of your QNAP 
+- Use right click on URL to send it to download station
+- List & remove current downloads
+- Test connection settings
