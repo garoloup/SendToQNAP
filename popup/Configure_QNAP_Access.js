@@ -1,4 +1,10 @@
 function saveOptions(e) {
+  // chrome.storage.local.set({
+  //   NASsecurevalue: document.querySelector("#NASsecure").value
+  // });
+  chrome.storage.local.set({
+    NASsecure: document.querySelector("#NASsecure").checked
+  });
   chrome.storage.local.set({
     NASaddress: document.querySelector("#NASaddress").value
   });
@@ -21,6 +27,22 @@ function restoreOptions() {
   function onError(error) {
     console.log(`Error: ${error}`);
   }
+
+  function setCurrentSecureValue(res){
+      document.querySelector("#NASsecure").value = res.NASsecurevalue || "Secure" ;
+      console.log("Set DOM "+document.querySelector("#NASsecure").value+" with "+res.NASsecurevalue || "Secure")
+  }
+
+//     chrome.storage.local.get('NASsecurevalue',setCurrentSecureValue);
+
+
+  function setCurrentSecure(res){
+         document.querySelector("#NASsecure").checked = res.NASsecure ;
+         console.log("Set DOM "+document.querySelector("#NASsecure").checked+" with "+res.NASsecure )
+     }
+
+        chrome.storage.local.get('NASsecure',setCurrentSecure);
+
 
  function setCurrentAddress(res){
      document.querySelector("#NASaddress").value = res.NASaddress || "192.168.0.2" ;
@@ -77,12 +99,22 @@ function testConnection()
   xhr.withCredentials = true;
 
     chrome.storage.local.get(null,function(res) {
+      var NASprotocol = "";
       var NASaddr = res.NASaddress;
       var NASport = res.NASport;
       var NASlogin = res.NASlogin;
       var NASpassword = res.NASpassword;
       var NASdir = res.NASdir;
-      console.log("settings:"+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/".NASdir);
+      var NASsecure = res.NASsecure;
+      if (NASsecure)
+      {
+        NASprotocol = "https";
+      }
+      else {
+        NASprotocol = "http";
+      }
+
+    console.log("settings "+res.NASsecure+" :"+NASprotocol+"://"+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/"+res.NASdir);
 
         xhr.addEventListener("readystatechange", function() {
         if(this.readyState === 4) {
@@ -116,11 +148,11 @@ function testConnection()
           }
         }
     });
+    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/cgi-bin/authLogin.cgi";
+    console.log("Request to send:"+requete);
+    xhr.open("GET", requete);
 
-  xhr.open("GET", "http://"+NASaddr+":"+NASport+"/cgi-bin/authLogin.cgi");
-
-  xhr.send();
-
+    xhr.send();
   });
 
 }

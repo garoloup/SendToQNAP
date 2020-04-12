@@ -116,7 +116,17 @@ function LoadAndLogAndListDNL() {
       NASlogin = res.NASlogin;
       NASpassword = res.NASpassword;
       NASdir = res.NASdir;
-    console.log("settings:"+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/".NASdir);
+      NASsecure = res.NASsecure;
+      if (NASsecure)
+      {
+        NASprotocol = "https";
+      }
+      else {
+        NASprotocol = "http";
+      }
+
+    console.log("settings: "+NASprotocol+" "+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/"+res.NASdir);
+
     if (false) /*(NASsid.length > 0)*/ {
       console.log("LLLD SID "+NASsid+" already avaialble")
       listDNL();
@@ -133,7 +143,6 @@ Login into NAS and get SID for next step
 */
 function LogAndListDNL() {
   var data = "";
-  //    var data = "user=admin&pass=bm9ncm9pMDE%3D";
 
   // cannot share SID in that way
   if (true) //(NASsid.length == 0)
@@ -154,10 +163,11 @@ function LogAndListDNL() {
         }
     });
 
-    console.log("Lancement QNAP get SID");
-    xhr.open("POST", "http://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login");
+    console.log("Lancement QNAP get DS SID");
+    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login";
+    console.log("Request to send:"+requete);
+    xhr.open("POST", requete);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    xhr.setRequestHeader("User-Agent", "Qget 1.4.0 rv:80 (iPhone; iOS 13.3.1; fr_FR)");
 
     xhr.send(data);
   }
@@ -245,8 +255,10 @@ function ListQNAPDNL(sid) {
         }
     });
 
-    xhr.open("POST", "http://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Query");
-    xhr.setRequestHeader("User-Agent", "Qget 1.4.0 rv:80 (iPhone; iOS 13.3.1; fr_FR)");
+    console.log("Lancement QNAP Query DS Tasks");
+    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Query";
+    console.log("Request to send:"+requete);
+    xhr.open("POST", requete);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
     console.log(xhr);
     xhr.send(data);
@@ -280,10 +292,11 @@ function LogAndDelDNL(hash) {
         }
     });
 
-    console.log("Lancement QNAP get SID");
-    xhr.open("POST", "http://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login");
+    console.log("Lancement QNAP Login DS SID");
+    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login";
+    console.log("Request to send:"+requete);
+    xhr.open("POST", requete);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    xhr.setRequestHeader("User-Agent", "Qget 1.4.0 rv:80 (iPhone; iOS 13.3.1; fr_FR)");
 
     xhr.send(data);
   }
@@ -298,7 +311,7 @@ function LogAndDelDNL(hash) {
 function delDNL(sid,hash) {
     //var data = "sid="+sid+"&temp=Download&move=Multimedia%2FTemp&url=http%3A%2F%2Freleases.ubuntu.com%2F18.04%2Fubuntu-18.04.4-desktop-amd64.iso";
     console.log("SID="+sid);
-    console.log("HAsh="+hash);
+    console.log("Hash="+hash);
 
     var data = "sid="+sid+"&hash="+hash;
 
@@ -318,8 +331,10 @@ function delDNL(sid,hash) {
 
     });
 
-    xhr.open("POST", "http://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Remove");
-    xhr.setRequestHeader("User-Agent", "Qget 1.4.0 rv:80 (iPhone; iOS 13.3.1; fr_FR)");
+    console.log("Lancement QNAP Remove Task hash:"+hash);
+    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Remove";
+    console.log("Request to send:"+requete);
+    xhr.open("POST", requete);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
     console.log(xhr);
     xhr.send(data);

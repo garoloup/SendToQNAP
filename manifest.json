@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "SendToQnap",
-  "version": "1.9",
+  "version": "2.0",
   "description": "Send a url to QNAP downloadstation",
   "default_locale": "en",
   "browser_specific_settings": {
@@ -24,7 +24,8 @@
     "menus",
     "contextMenus",
     "storage",
-    "http://*/"
+    "http://*/",
+    "https://*/"
 ],
 
 "applications": {

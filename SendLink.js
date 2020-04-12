@@ -72,6 +72,8 @@ function onError(error) {
 /* +++++++++++++++++++++++++++++++++
 QNAP settings vars
 */
+var NASsecure = false;
+var NASprotocol = "";
 var NASaddr = "0.0.0.0";
 var NASport = "80";
 var NASlogin = "";
@@ -92,6 +94,14 @@ function initialize() {
       NASlogin = res.NASlogin;
       NASpassword = res.NASpassword;
       NASdir = res.NASdir;
+      NASsecure = res.NASsecure;
+      if (NASsecure)
+      {
+        NASprotocol = "https";
+      }
+      else {
+        NASprotocol = "http";
+      }
   });
 }
 //browser.storage.onChanged.addListener(initialize);
@@ -125,7 +135,16 @@ function LoadAndLogAndAddUrl(url) {
       NASlogin = res.NASlogin;
       NASpassword = res.NASpassword;
       NASdir = res.NASdir;
-    console.log("settings:"+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/".NASdir);
+      NASsecure = res.NASsecure;
+      if (NASsecure)
+      {
+        NASprotocol = "https";
+      }
+      else {
+        NASprotocol = "http";
+      }
+
+    console.log("settings: "+NASprotocol+" "+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/"+res.NASdir);
      LogAndAddUrl(url);
   });
 }
@@ -162,9 +181,8 @@ function LogAndAddUrl(url) {
     });
 
     console.log("Lancement QNAP get SID");
-    xhr.open("POST", "http://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login");
+    xhr.open("POST", NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login");
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    xhr.setRequestHeader("User-Agent", "Qget 1.4.0 rv:80 (iPhone; iOS 13.3.1; fr_FR)");
 
     xhr.send(data);
   }
@@ -202,8 +220,7 @@ function addURL(sid, url) {
         }
     });
 
-    xhr.open("POST", "http://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/AddUrl");
-    xhr.setRequestHeader("User-Agent", "Qget 1.4.0 rv:80 (iPhone; iOS 13.3.1; fr_FR)");
+    xhr.open("POST", NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/AddUrl");
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
     console.log(xhr);
     xhr.send(data);
