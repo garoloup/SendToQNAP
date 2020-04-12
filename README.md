@@ -4,3 +4,5 @@ Manage Download station from browser:
 - Use right click on URL to send it to download station
 - List & remove current downloads
 - Test connection settings
+- Add SSL option to NAS connection settings
+
