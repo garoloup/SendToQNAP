@@ -326,7 +326,7 @@ function delDNL(sid,hash) {
             console.log("error:"+jsonData.error);
 
             console.log("EndOfDel=>List (SID ="+sid+"  )")
-            ListQNAPDNL(sid);
+            setTimeout( ListQNAPDNL, 500, sid);
       }
 
     });

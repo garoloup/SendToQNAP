@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "SendToQnap",
-  "version": "2.0",
+  "version": "2.1",
   "description": "Send a url to QNAP downloadstation",
   "default_locale": "en",
   "browser_specific_settings": {
@@ -12,9 +12,11 @@
   },
 
   "icons": {
+    "32": "icons/32_download.png",
     "48": "icons/48_download.png",
-    "96": "icons/96_download.png"
-  },
+    "96": "icons/96_download.png",
+    "128": "icons/128_download.png"
+},
 
     "options_ui": {
     "page": "popup/Configure_QNAP_Access.html"
