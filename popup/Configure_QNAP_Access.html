@@ -8,6 +8,11 @@
 
   <body>
       <p>QNAP Settings</p>
+      <p>QNAP <button id="SettingsMenu"> Settings </button>            </p>
+       <label id="ErrMsg"></label>
+       <hr>
+
+  <div id="NASSettingForm" class="hidesection">
   <form>
     <table style="width:90%">
 
@@ -19,7 +24,7 @@
           <input class="NASSetting" type="checkbox" id="NASsecure" name="NASSec" value="Secure"><br />
         </td>
       </tr>
-      
+
       <tr>
         <td>
           <label> Address</label>
@@ -69,7 +74,11 @@
     </table>
      <button type="submit">Save</button>
   </form>
+
   <hr>
+</div>
+
+
   <button id="testConnectionButton">test Connection</button>
   <div>
   <label id="NASInfo">Unknown</label>

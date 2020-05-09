@@ -5,4 +5,5 @@ Manage Download station from browser:
 - List & remove current downloads
 - Test connection settings
 - Add SSL option to NAS connection settings
+- Add foldable setting section
 

@@ -1,7 +1,12 @@
 
 html, body {
   font-size: 0.9em;
+  width:300px;
 }
+
+.showsection{display:block}
+.hidesection{display:none}
+
 
 .NASSetting  {
   margin: 3% auto;

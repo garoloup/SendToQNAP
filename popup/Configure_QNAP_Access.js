@@ -93,6 +93,18 @@ function chnageNASInfo(newInfo)
   document.querySelector("#NASInfo").textContent=newInfo;
 }
 
+function toggleHideMenu() {
+  var x = document.querySelector("#NASSettingForm");
+//  console.log("Section id "+id+" is "x.className.indexOf("showsection"))
+  if (x.className.indexOf("hidesection") == -1) {
+    x.className += "hidesection";
+  } else {
+    x.className = x.className.replace("hidesection", "");
+  }
+}
+document.querySelector("#SettingsMenu").addEventListener("click", toggleHideMenu);
+
+
 function testConnection()
 {
   var xhr = new XMLHttpRequest();
