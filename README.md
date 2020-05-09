@@ -6,4 +6,5 @@ Manage Download station from browser:
 - Test connection settings
 - Add SSL option to NAS connection settings
 - Add foldable setting section
+- Add some error handling on testconnection
 
