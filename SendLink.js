@@ -78,6 +78,7 @@ var NASaddr = "0.0.0.0";
 var NASport = "80";
 var NASlogin = "";
 var NASpassword = "";
+var NAStempdir = "";
 var NASdir = "";
 var NASsid = "";
 
@@ -93,6 +94,7 @@ function initialize() {
       NASport = res.NASport;
       NASlogin = res.NASlogin;
       NASpassword = res.NASpassword;
+      NAStempdir = res.NAStempdir;
       NASdir = res.NASdir;
       NASsecure = res.NASsecure;
       if (NASsecure)
@@ -134,6 +136,7 @@ function LoadAndLogAndAddUrl(url) {
       NASport = res.NASport;
       NASlogin = res.NASlogin;
       NASpassword = res.NASpassword;
+      NAStempdir = res.NAStempdir;
       NASdir = res.NASdir;
       NASsecure = res.NASsecure;
       if (NASsecure)
@@ -144,7 +147,7 @@ function LoadAndLogAndAddUrl(url) {
         NASprotocol = "http";
       }
 
-    console.log("settings: "+NASprotocol+" "+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/"+res.NASdir);
+    console.log("settings: "+NASprotocol+" "+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+" temp="+res.NAStempdir+" move="+res.NASdir);
      LogAndAddUrl(url);
   });
 }
@@ -207,12 +210,17 @@ function addURL(sid, url) {
     urlQNAP = urlQNAP.replace(/:/,"%3A");
     console.log("urlQNAP="+urlQNAP);
 
+    var tempdirQNAP = NAStempdir.replace(/\//g,"%2F");
+    tempdirQNAP = tempdirQNAP.replace(/:/,"%3A");
+    console.log("tempdirQNAP="+tempdirQNAP);
+
     var dirQNAP = NASdir.replace(/\//g,"%2F");
     dirQNAP = dirQNAP.replace(/:/,"%3A");
     console.log("dirQNAP="+dirQNAP);
 
-    var data = "sid="+sid+"&temp=Download&move="+dirQNAP+"&url="+urlQNAP;
     //var data = "sid="+sid+"&temp=Download&move=Multimedia%2FTemp&url="+urlQNAP;
+    //var data = "sid="+sid+"&temp=Download&move="+dirQNAP+"&url="+urlQNAP;
+    var data = "sid="+sid+"&temp="+tempdirQNAP+"&move="+dirQNAP+"&url="+urlQNAP;
 
     var xhr = new XMLHttpRequest();
     xhr.withCredentials = true;

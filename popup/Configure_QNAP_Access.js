@@ -18,6 +18,9 @@ function saveOptions(e) {
     NASpassword: document.querySelector("#NASpassword").value
   });
   chrome.storage.local.set({
+    NAStempdir: document.querySelector("#NAStempdir").value
+  });
+  chrome.storage.local.set({
     NASdir: document.querySelector("#NASdir").value
   });
 //  e.preventDefault();
@@ -72,11 +75,17 @@ function setCurrentPassword(res){
 
     chrome.storage.local.get('NASpassword',setCurrentPassword);
 
+    function setCurrentTempDir(res){
+         document.querySelector("#NAStempdir").value = res.NAStempdir || "Download" ;
+          console.log("Set DOM "+document.querySelector("#NAStempdir").value+" with "+res.NAStempdir || "Download" )
+    }
+
+        chrome.storage.local.get('NAStempdir',setCurrentTempDir);
 
 
 function setCurrentDir(res){
-     document.querySelector("#NASdir").value = res.NASdir || "Multimedia/Films" ;
-      console.log("Set DOM "+document.querySelector("#NASdir").value+" with "+res.NASdir || "Multimedia/Films" )
+     document.querySelector("#NASdir").value = res.NASdir || "Public/Multimedia/Films" ;
+      console.log("Set DOM "+document.querySelector("#NASdir").value+" with "+res.NASdir || "Public/Multimedia/Films" )
 }
 
     chrome.storage.local.get('NASdir',setCurrentDir);
