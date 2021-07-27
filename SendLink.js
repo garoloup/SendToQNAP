@@ -49,6 +49,7 @@ function onCreated() {
     console.log(`Error: ${chrome.runtime.lastError}`);
   } else {
     console.log("Item created successfully");
+      initialize();
   }
 }
 
@@ -81,75 +82,77 @@ var NASpassword = "";
 var NAStempdir = "";
 var NASdir = "";
 var NASsid = "";
+var NASDNLNb = 0;
 
 function onError(error) {
     console.log(`Error: ${error}`);
   }
 
 
-function initialize() {
+async function initialize() {
+    await getSettings();
+
+    console.log("initialize => settings: "+NASprotocol+" "+NASlogin+":"+NASpassword+"@"+NASaddr+":"+NASport+" temp="+NAStempdir+" move="+NASdir);
+    
+//    NASDNLNb = await getQNAPDNLNb(NASsid);
+//    console.log("initialize NASDNLNb"+NASDNLNb);
 //  var gettingAllStorageItems = browser.storage.local.get(null);
-  chrome.storage.local.get(null,function(res) {
-      NASaddr = res.NASaddress;
-      NASport = res.NASport;
-      NASlogin = res.NASlogin;
-      NASpassword = res.NASpassword;
-      NAStempdir = res.NAStempdir;
-      NASdir = res.NASdir;
-      NASsecure = res.NASsecure;
-      if (NASsecure)
-      {
-        NASprotocol = "https";
-      }
-      else {
-        NASprotocol = "http";
-      }
-  });
+//  chrome.storage.local.get(null,function(res) {
+//      NASaddr = res.NASaddress;
+//      NASport = res.NASport;
+//      NASlogin = res.NASlogin;
+//      NASpassword = res.NASpassword;
+//      NAStempdir = res.NAStempdir;
+//      NASdir = res.NASdir;
+//      NASsecure = res.NASsecure;
+//      if (NASsecure)
+//      {
+//        NASprotocol = "https";
+//      }
+//      else {
+//        NASprotocol = "http";
+//      }
+//  });
 }
+
+
+/* +++++++++++++++++++++++++++++++++
+Update NAS settings if chnaged in popup
+*/
 //browser.storage.onChanged.addListener(initialize);
 chrome.storage.onChanged.addListener(initialize);
 
 /* +++++++++++++++++++++++++++++++++
-Section of HTTP request to send download URL to QNAP
- +++++++++++++++++++++++++++++++++ */
-
-function handleCreatedbyXHR(item) {
-
-   LoadAndLogAndAddUrl(item.url) ;
-}
+initialize by loaing settings and DNL nb
+*/
+initialize();
 
 /* +++++++++++++++++++++++++++++++++
 Load NAS settings and call next steps
 */
-function LoadAndLogAndAddUrl(url) {
-//  var gettingAllStorageItems = browser.storage.local.get(null);
-/*  var gettingAllStorageItems = chrome.storage.local.get(null);
-  gettingAllStorageItems.then((res) => {
-      NASaddr = res.NASaddress;
-      NASport = res.NASport;
-      NASlogin = res.NASlogin;
-      NASpassword = res.NASpassword;
-      NASdir = res.NASdir;*/
+async function LoadAndLogAndAddUrl(url) {
+    await getSettings();
 
-    chrome.storage.local.get(null,function(res) {
-      NASaddr = res.NASaddress;
-      NASport = res.NASport;
-      NASlogin = res.NASlogin;
-      NASpassword = res.NASpassword;
-      NAStempdir = res.NAStempdir;
-      NASdir = res.NASdir;
-      NASsecure = res.NASsecure;
-      if (NASsecure)
+    console.log("settings: "+NASprotocol+" "+NASlogin+":"+NASpassword+"@"+NASaddr+":"+NASport+" temp="+NAStempdir+" move="+NASdir);
+
+    let resLogin = await loginNAS();
+    console.log("LoadAndLogAndAddUrl: called loginNAS="+resLogin);
+
+    if (resLogin === true)
+    {
+      // Call addUrl with SID & URL
+      console.log("LoadAndLogAndAddUrl: async fct now calls addUrl with SID & URL");
+
+      let resSend = await sendURL(NASsid,url);
+      if (resSend === true )
       {
-        NASprotocol = "https";
+        console.log("LoadAndLogAndAddUrl: sendURL OK with "+url);
       }
-      else {
-        NASprotocol = "http";
+      else
+      {
+        console.log("LoadAndLogAndAddUrl: sendURL error with "+url);
       }
-
-    console.log("settings: "+NASprotocol+" "+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+" temp="+res.NAStempdir+" move="+res.NASdir);
-     LogAndAddUrl(url);
-  });
+    }
 }
 
 function notifyExtension(url) {
@@ -159,126 +162,115 @@ function notifyExtension(url) {
 
 
 /* +++++++++++++++++++++++++++++++++
-Login into NAS and get SID for next step
+Login into NAS 
 */
-function LogAndAddUrl(url) {
-  var data = "";
+// Moved to common.js
+/* WIP : replace with fetch and await 
+async function loginNAS()
+{
+  let data = "user="+NASlogin+"&pass="+btoa(NASpassword);
+  console.log("async loginNAS: param login ="+data);
+  let response = await fetch(NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login", {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+    },
+    body: data,
+    credentials: 'include' 
+  })
+  let responseData = await response.json();
+  if (response.ok) {
+    console.log(this.responseData);
+    console.log("SID="+responseData.sid);//obj.sid);
+    NASsid = responseData.sid;//obj.sid;
 
-  // cannot share SID in that way
-  if (true) //(NASsid.length == 0)
-  {
-    var xhr = new XMLHttpRequest();
-
-    data = "user="+NASlogin+"&pass="+btoa(NASpassword);
-    console.log("param login ="+data);
-    xhr.withCredentials = true;
-
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
-          console.log(this.responseText);
-          var obj = JSON.parse(this.responseText);
-          console.log("SID="+obj.sid);
-          NASsid = obj.sid;
-          addURL(obj.sid,url);
-        }
-    });
-
-    console.log("Lancement QNAP get SID");
-    xhr.open("POST", NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login");
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-
-    xhr.send(data);
+    return true;
   }
   else {
-    console.log("SID "+NASsid+" already avaialble")
-    addURL(NASsid,url);
+    console.error("loginNAS failed "+response);
+    return false;
+  }
+
+}*/
+
+/* +++++++++++++++++++++++++++++++++
+ Add download task using SID
+ Add URL using fetch
+*/
+async function sendURL(sid,url)
+{
+    //var data = "sid="+sid+"&temp=Download&move=Multimedia%2FTemp&url=http%3A%2F%2Freleases.ubuntu.com%2F18.04%2Fubuntu-18.04.4-desktop-amd64.iso";
+  console.log("Send URL: SID="+sid+"URL="+url);
+
+  var urlQNAP = url.replace(/\//g,"%2F");
+  urlQNAP = urlQNAP.replace(/:/,"%3A");
+  console.log("urlQNAP="+urlQNAP);
+
+  var tempdirQNAP = NAStempdir.replace(/\//g,"%2F");
+  tempdirQNAP = tempdirQNAP.replace(/:/,"%3A");
+  console.log("tempdirQNAP="+tempdirQNAP);
+
+  var dirQNAP = NASdir.replace(/\//g,"%2F");
+  dirQNAP = dirQNAP.replace(/:/,"%3A");
+  console.log("dirQNAP="+dirQNAP);
+    
+    //var data = "sid="+sid+"&temp=Download&move=Multimedia%2FTemp&url="+urlQNAP;
+    //var data = "sid="+sid+"&temp=Download&move="+dirQNAP+"&url="+urlQNAP;
+  var data = "sid="+sid+"&temp="+tempdirQNAP+"&move="+dirQNAP+"&url="+urlQNAP;
+
+  let response = await fetch(NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/AddUrl", {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+    },
+    body: data
+  })
+
+  if (response.ok) {
+    let responseData = await response.json();
+    console.log("sendURL: fetch reponse ok = "+responseData);
+      if (responseData.error === 0)
+      {
+        showMessage("+1");
+        // Clear badge in 5s
+        setTimeout( clearMessage, 5000);
+        setTimeout( watchDownloads, 5500);
+          
+        return(true);
+      }
+      else if (responseData.error !== 0) {
+          console.log("sendURL: error fetch :"+response.status);
+        showError("Err");
+        // Clear badge in 5s
+        setTimeout( clearError, 5000);
+        return(false);
+
+      }
+
   }
 }
 
 /* +++++++++++++++++++++++++++++++++
- Add download task using SID
+ Refresh Task Nb periodically
 */
-function addURL(sid, url) {
-    //var data = "sid="+sid+"&temp=Download&move=Multimedia%2FTemp&url=http%3A%2F%2Freleases.ubuntu.com%2F18.04%2Fubuntu-18.04.4-desktop-amd64.iso";
-    console.log("SID="+sid);
-    console.log("URL="+url);
 
-    // to test error case
-    //url="for error case";
+async function watchDownloads()
+{
+//    let DNLList = await getQNAPDNLList(NASsid);
+//    let NbDNL = DNLList.status.downloading;
+//    showMessage(NbDNL.toString());
 
-    var urlQNAP = url.replace(/\//g,"%2F");
-    urlQNAP = urlQNAP.replace(/:/,"%3A");
-    console.log("urlQNAP="+urlQNAP);
-
-    var tempdirQNAP = NAStempdir.replace(/\//g,"%2F");
-    tempdirQNAP = tempdirQNAP.replace(/:/,"%3A");
-    console.log("tempdirQNAP="+tempdirQNAP);
-
-    var dirQNAP = NASdir.replace(/\//g,"%2F");
-    dirQNAP = dirQNAP.replace(/:/,"%3A");
-    console.log("dirQNAP="+dirQNAP);
-
-    //var data = "sid="+sid+"&temp=Download&move=Multimedia%2FTemp&url="+urlQNAP;
-    //var data = "sid="+sid+"&temp=Download&move="+dirQNAP+"&url="+urlQNAP;
-    var data = "sid="+sid+"&temp="+tempdirQNAP+"&move="+dirQNAP+"&url="+urlQNAP;
-
-    var xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
-
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
-            console.log(this.responseText);
-            var obj = JSON.parse(this.responseText);
-            if (obj.error === 0)
-            {
-              showMessage("+1");
-              // Clear badge in 5s
-              setTimeout( clearMessage, 5000);
-            }
-            else if (obj.error !== 0) {
-              showError("Err");
-              // Clear badge in 5s
-              setTimeout( clearError, 5000);
-
-            }
+    let NbDNL = await getQNAPDNLNb(NASsid);
+    showMessage(NbDNL.toString());
+    if (NbDNL > 0)
+        {
+            await timeout(2000);
+            watchDownloads();            
         }
-    });
-
-    xhr.open("POST", NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/AddUrl");
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    console.log(xhr);
-    xhr.send(data);
-
+    else{
+            await timeout(2000);
+            clearMessage();
     }
-
-    //==================
-function showMessage(msg)
-{
-  console.log(msg);
-// To replace with err storage as popup not present
-//      document.querySelector("#ErrMsg").textContent = msg;
-  chrome.browserAction.setBadgeText({text:msg});
 }
 
-function showError(msg)
-{
-  console.log(msg);
-//      document.querySelector("#ErrMsg").textContent = msg;
-  chrome.browserAction.setBadgeText({text:msg});
-}
 
-function clearError()
-{
-  console.log("Clear Error");
-//      document.querySelector("#ErrMsg").textContent = "";
-  chrome.browserAction.setBadgeText({text:""});
-//      document.querySelector("#NASpasswordLabel").style.color = "black";
-}
-
-function clearMessage()
-{
-  console.log("Clear Message");
-//      document.querySelector("#ErrMsg").textContent = "";
-  chrome.browserAction.setBadgeText({text:""});
-//      document.querySelector("#NASpasswordLabel").style.color = "black";
-}

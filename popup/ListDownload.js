@@ -7,6 +7,9 @@ const input = document.querySelector("#NAStest");
 const tableDNL = document.querySelector("#NASDownloadTable");
 const JobNb = document.querySelector("#NASDNLJobNb");
 
+var NASsid="";
+
+
 /* +++++++++++++++++++++++++++++++++
  Fill DOM element with retrieved Nb of download Jobs
 */
@@ -91,7 +94,7 @@ function initListSection()
 {
     var refreshButton = document.querySelector("#NASrefresh");
 
-    refreshButton.addEventListener("click", LoadAndLogAndListDNL);
+    refreshButton.addEventListener("click", LoadAndLogAndListDNL_bis /*LoadAndLogAndListDNL*/);
 }
 
 initListSection();
@@ -138,44 +141,164 @@ function LoadAndLogAndListDNL() {
 }
 
 
+// WIP replace by asunc pattern
 /* +++++++++++++++++++++++++++++++++
-Login into NAS and get SID for next step
+Load settings, Log and List DNL
 */
-function LogAndListDNL() {
-  var data = "";
+async function LoadAndLogAndListDNL_bis() {
+    var resLogin = false;
+    
+    clearError();
+    clearPopupError();
+    await getSettings();
 
-  // cannot share SID in that way
-  if (true) //(NASsid.length == 0)
-  {
-    var xhr = new XMLHttpRequest();
-
-    data = "user="+NASlogin+"&pass="+btoa(NASpassword);
-    console.log("param login ="+data);
-    xhr.withCredentials = true;
-
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
-          console.log(this.responseText);
-          var obj = JSON.parse(this.responseText);
-          console.log("SID="+obj.sid);
-          //NASsid = obj.sid;
-          ListQNAPDNL(obj.sid);
+    console.log(" LogAndListDNL_bis : settings: "+NASprotocol+" "+NASlogin+":"+NASpassword+"@"+NASaddr+":"+NASport+" temp="+NAStempdir+" move="+NASdir);
+/*
+    try
+        {
+        resLogin = await loginNAS();
+        console.log("LogAndListDNL_bis: called loginNAS="+resLogin);
+        } 
+    catch(err)
+        {
+            console.log("LoadAndLogAndListDNL_bis: Bad NAS address or login")
+            showPopupError("Bad NAS address or login")
         }
-    });
 
-    console.log("Lancement QNAP get DS SID");
-    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login";
-    console.log("Request to send:"+requete);
-    xhr.open("POST", requete);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+    if (resLogin === true)*/
+    {
+      // Call addUrl with SID & URL
+      console.log("LogAndListDNL_bis: async fct now calls addUrl with SID="+NASsid+" & URL");
 
-    xhr.send(data);
-  }
-  else {
-    //console.log("LLD SID "+NASsid+" already avaialble")
-    //listDNL(NASsid);
-  }
+      let resSend = await ListQNAPDNL_bis(NASsid);
+      if (resSend === true )
+      {
+        console.log("LogAndListDNL_bis: ListQNAPDNL_bis OK with ");
+      }
+      else
+      {
+        console.log("LogAndListDNL_bis: ListQNAPDNL_bis error");
+      }
+    }
 }
+
+/* +++++++++++++++++++++++++++++++++
+ Add download task using SID
+*/
+async function ListQNAPDNL_bis(sid) {
+    console.log("ListQNAPDNL_bis: SID="+sid);
+
+    console.log("Launch QNAP Query DS Tasks");
+    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Query";
+    console.log("Request to send:"+requete);
+    var data = "sid="+sid+"&limit=0&status=all&type=all";
+
+    let response = await fetch(requete, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+        },
+        body: data
+        }
+    )
+    
+    if(response.ok ) {
+        var jsonData = await response.json(); //JSON.parse(this.responseText);
+        console.log("ListQNAPDNL_bis: fetch response: "+JSON.stringify(jsonData));
+
+        // an error occured
+        if (jsonData.error > 0)
+            {
+                console.log("ListQNAPDNL_bis: error code="+jsonData.error+ " reason="+jsonData.reason);
+                
+                // check if session expiration error
+                if ( jsonData.error === 5)
+                    {
+                        console.log("ListQNAPDNL_bis:session expired: try to relogin");
+   
+                    try
+                        {
+                        resLogin = await loginNAS();
+                        console.log("LogAndListDNL_bis: called loginNAS="+resLogin);
+                        } 
+                    catch(err)
+                        {
+                            console.log("LoadAndLogAndListDNL_bis: Bad NAS address or login")
+                            showPopupError("Bad NAS address or login");
+                        }
+
+                    if (resLogin === true)
+                        {
+                            let resSend = await ListQNAPDNL_bis(NASsid);
+                            if (resSend === true )
+                            {
+                                console.log("LogAndListDNL_bis: ListQNAPDNL_bis OK with ");
+                            }
+                            else
+                            {
+                                console.log("LogAndListDNL_bis: ListQNAPDNL_bis error");
+                            }
+                            return resSend;
+                        }
+                    }
+                else // other error to report 
+                {
+                    showPopupError(jsonData.reason);
+                    return false;
+                }
+            }
+        
+        clearDNLTable();
+        console.log("Total tasks:"+jsonData.total);
+        console.log("Total downloading:"+jsonData.status.downloading);
+        setJobNb(jsonData.status.downloading);
+        for (i=0; i < jsonData.total ; i++) {
+            if ( jsonData.data[i].state != "5" && jsonData.data[i].state != "4") {
+              console.log("En cours ["+i+"].status : "+jsonData.data[i].state+" - "+jsonData.data[i].source_name);
+              console.log("Rate ["+i+"] : "+jsonData.data[i].total_down+" / "+jsonData.data[i].size);
+              let doneDNL = parseInt(jsonData.data[i].total_down);
+              let todoDNL = parseInt(jsonData.data[i].size);
+              let rateDNL = 0;
+              let fnDNL = getFilenameOfURL(jsonData.data[i].source);
+              let hashDNL = jsonData.data[i].hash;
+              if (todoDNL > 0)
+              {
+                rateDNL = Math.trunc(100*doneDNL/todoDNL);
+              }
+              else {
+                rateDNL = 0;
+              }
+
+              console.log("Rate ["+i+"] : "+rateDNL);
+              console.log("Rate"+rateDNL.toString());
+//                    AddQNAPDNL(getFilenameOfURL(jsonData.data[i].source));
+
+              let TabElt = document.querySelector("[hash=\""+hashDNL+"\"]");
+              console.log("Query Result ("+fnDNL+" - "+hashDNL+") = "+TabElt);
+
+
+              if ( TabElt == null)
+              {
+                console.log("Create="+fnDNL+" - "+hashDNL);
+                AddQNAPDNLasTable(hashDNL,getFilenameOfURL(fnDNL),rateDNL.toString());
+              }
+              else {
+                console.log("Doublon="+fnDNL+" - "+hashDNL);
+              }
+
+                //AddQNAPDNL(jsonData.data[i].source_name); // Only filled if actually downloading state = 104
+            }
+            else {
+              //console.log("Fini["+i+"].status : "+jsonData.data[i].state+" - "+jsonData.data[i].source_name);
+
+            }
+        }
+    }
+    return true;
+}
+
+// WIP
+
 
 /* +++++++++++++++++++++++++++++++++
    return filename from URL
@@ -189,80 +312,6 @@ function getFilenameOfURL(url) {
   console.log("fileURL="+fileURL);
 
   return(fileURL);
-}
-
-/* +++++++++++++++++++++++++++++++++
- Add download task using SID
-*/
-function ListQNAPDNL(sid) {
-    console.log("SID="+sid);
-
-    var data = "sid="+sid+"&limit=0&status=all&type=all";
-
-    var xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
-
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
-            console.log(this.responseText);
-            var jsonData = JSON.parse(this.responseText);
-
-            clearDNLTable();
-            console.log("Total tasks:"+jsonData.total);
-            console.log("Total downloading:"+jsonData.status.downloading);
-            setJobNb(jsonData.status.downloading);
-            for (i=0; i < jsonData.total ; i++) {
-                if ( jsonData.data[i].state != "5" && jsonData.data[i].state != "4") {
-                  console.log("En cours ["+i+"].status : "+jsonData.data[i].state+" - "+jsonData.data[i].source_name);
-                  console.log("Rate ["+i+"] : "+jsonData.data[i].total_down+" / "+jsonData.data[i].size);
-                  let doneDNL = parseInt(jsonData.data[i].total_down);
-                  let todoDNL = parseInt(jsonData.data[i].size);
-                  let rateDNL = 0;
-                  let fnDNL = getFilenameOfURL(jsonData.data[i].source);
-                  let hashDNL = jsonData.data[i].hash;
-                  if (todoDNL > 0)
-                  {
-                    rateDNL = Math.trunc(100*doneDNL/todoDNL);
-                  }
-                  else {
-                    rateDNL = 0;
-                  }
-
-                  console.log("Rate ["+i+"] : "+rateDNL);
-                  console.log("Rate"+rateDNL.toString());
-//                    AddQNAPDNL(getFilenameOfURL(jsonData.data[i].source));
-
-                  let TabElt = document.querySelector("[hash=\""+hashDNL+"\"]");
-                  console.log("Query Result ("+fnDNL+" - "+hashDNL+") = "+TabElt);
-
-
-                  if ( TabElt == null)
-                  {
-                    console.log("Create="+fnDNL+" - "+hashDNL);
-                    AddQNAPDNLasTable(hashDNL,getFilenameOfURL(fnDNL),rateDNL.toString());
-                  }
-                  else {
-                    console.log("Doublon="+fnDNL+" - "+hashDNL);
-                  }
-
-                    //AddQNAPDNL(jsonData.data[i].source_name); // Only filled if actually downloading state = 104
-                }
-                else {
-                  //console.log("Fini["+i+"].status : "+jsonData.data[i].state+" - "+jsonData.data[i].source_name);
-
-                }
-            }
-        }
-    });
-
-    console.log("Lancement QNAP Query DS Tasks");
-    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Query";
-    console.log("Request to send:"+requete);
-    xhr.open("POST", requete);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    console.log(xhr);
-    xhr.send(data);
-
 }
 
 

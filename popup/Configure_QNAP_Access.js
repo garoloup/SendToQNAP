@@ -92,12 +92,14 @@ function setCurrentDir(res){
 }
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
+//document.addEventListener('DOMContentLoaded', LoadAndLogAndListDNL);
+document.addEventListener('DOMContentLoaded', LoadAndLogAndListDNL_bis);
 
 chrome.storage.onChanged.addListener(restoreOptions);
 document.querySelector("form").addEventListener("submit", saveOptions);
 
 
-function chnageNASInfo(newInfo)
+function changeNASInfo(newInfo)
 {
   document.querySelector("#NASInfo").textContent=newInfo;
 }
@@ -114,7 +116,7 @@ function toggleHideMenu() {
 document.querySelector("#SettingsMenu").addEventListener("click", toggleHideMenu);
 
 
-//==================
+/*==================
 function showMessage(msg)
 {
   console.log("Show msg: "+msg);
@@ -143,14 +145,19 @@ function clearError()
   chrome.browserAction.setBadgeText({text:""});
   document.querySelector("#NASpasswordLabel").style.color = "black";
 }
-//=================
+*/
 
+//=================
+// Test NAS address & port 
+// Still using XHR API for timeout capability
+//=================
 function testConnection()
 {
   var xhr = new XMLHttpRequest();
   xhr.withCredentials = true;
 
     clearError();
+    clearPopupError();
 
     chrome.storage.local.get(null,function(res) {
       var NASprotocol = "";
@@ -172,12 +179,14 @@ function testConnection()
     console.log("settings "+res.NASsecure+" :"+NASprotocol+"://"+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/"+res.NASdir);
         xhr.addEventListener("error", (e) => {
           console.log(e);
-          showError(e.message);//+": "+e.error.toString());
+          showError("Err");
+          showPopupError(e.message);//+": "+e.error.toString());
 
         });
         xhr.addEventListener("timeout", () => {
           console.log(NASaddr+" not responding");
-          showError(NASaddr+" not responding");//+": "+e.error.toString());
+          showError("Err");
+          showPopupError(NASaddr+" not responding");//+": "+e.error.toString());
 
         });
         xhr.addEventListener("readystatechange", function() {
@@ -210,20 +219,22 @@ function testConnection()
 
               let NASPortInfo = jsonObject.QDocRoot[0].webAccessPort[0]._text;
               console.log("port = "+NASPortInfo);
-              chnageNASInfo(NASHostname+" "+NASDisplayName+" "+NASIPinfo+":"+NASPortInfo);
+              changeNASInfo(NASHostname+" "+NASDisplayName+" "+NASIPinfo+":"+NASPortInfo);
+   
             }
             else {
-              showError("Empty response from "+NASaddr);
+              showError("Err");
+              showPopupError("Empty response from "+NASaddr);
             }
           }
           else {
             {
               if (this.status === 404)
-                showError("Err "+this.status +" Page not found "+NASaddr);
+                showPopupError("Err "+this.status +" Page not found "+NASaddr);
               else  if (this.status === 500)
-                  showError("Err "+this.status +" Server error of "+NASaddr);
+                  showPopupError("Err "+this.status +" Server error of "+NASaddr);
               else
-              showError("Err "+this.status +" with "+NASaddr);
+              showPopupError("Err "+this.status +" with "+NASaddr);
             }
           }
         }
@@ -236,7 +247,7 @@ function testConnection()
       xhr.send();
     } catch (e) {
       console.log(e);
-      showError(e.message);//+": "+e.error.toString());
+      showPopupError(e.message);//+": "+e.error.toString());
     } finally {
 
     }
