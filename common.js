@@ -6,7 +6,7 @@ async function getSettings()
     
     let res = await storedItems;
     
-    console.log("getSettings res="+res);
+    appendLog("getSettings res="+res);
 
     NASaddr = res.NASaddress;
     NASport = res.NASport;
@@ -32,7 +32,7 @@ async function getSettings()
 async function loginNAS()
 {
     let data = "user="+NASlogin+"&pass="+btoa(NASpassword);
-    console.log("async loginNAS: param login ="+data);
+    appendLog("async loginNAS: param login ="+data);
     
     let requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login";
 // TODO retrun false/throw err if bad URL , port or login/pwd
@@ -45,20 +45,20 @@ async function loginNAS()
         credentials: 'include' 
     });
         
-    console.log("loginNAS fetch response ok ="+response.ok +" status="+response.status);
+    appendLog("loginNAS fetch response ok ="+response.ok +" status="+response.status);
 
     if (response.ok) {
         let responseData = await response.json();
-        console.log("loginNAS fetch response = "+JSON.stringify(responseData) );
+        appendLog("loginNAS fetch response = "+JSON.stringify(responseData) );
         if (responseData.error == 0)
             {
-                console.log("SID="+responseData.sid);
+                appendLog("SID="+responseData.sid);
                 NASsid = responseData.sid;
                 return true;
             }
         else
             {
-                console.log("loginNAS error = "+responseData.error);
+                appendLog("loginNAS error = "+responseData.error);
                 showError("Err");
                 showPopupError("Failed to login")
                 return false;
@@ -80,13 +80,13 @@ async function loginNAS()
  Get download tasks list
 */
 async function getQNAPDNLList(sid) {
-    console.log("getQNAPDNLList SID="+sid);
+    appendLog("getQNAPDNLList SID="+sid);
 
     var data = "sid="+sid+"&limit=0&status=all&type=all";
 
-    console.log("Lauch QNAP Query DS Tasks");
+    appendLog("Lauch QNAP Query DS Tasks");
     var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Query";
-    console.log("Request to send:"+requete);
+    appendLog("Request to send:"+requete);
 
     let response = await fetch(requete, {
         method: 'POST',
@@ -100,11 +100,11 @@ async function getQNAPDNLList(sid) {
     let responseData = await response.json();
     
     if (response.ok && responseData.error == 0) {
-        console.log("getQNAPDNLList: reponse ok = "+responseData);
+        appendLog("getQNAPDNLList: reponse ok = "+responseData);
         return(responseData);
     }
     else {
-        console.log("getQNAPDNLList: reponse error = "+responseData.error+"error reason = "+responseData.reason);
+        appendLog("getQNAPDNLList: reponse error = "+responseData.error+"error reason = "+responseData.reason);
         throw(responseData.reason);
         return [];
     }
@@ -131,7 +131,7 @@ function timeout(ms) {
 //==================
 function showMessage(msg)
 {
-  console.log(msg);
+  appendLog(msg);
 // To replace with err storage as popup not present
 //      document.querySelector("#ErrMsg").textContent = msg;
   chrome.browserAction.setBadgeText({text:msg});
@@ -139,14 +139,14 @@ function showMessage(msg)
 
 function showError(msg)
 {
-  console.log(msg);
+  appendLog(msg);
 //      document.querySelector("#ErrMsg").textContent = msg;
   chrome.browserAction.setBadgeText({text:msg});
 }
 
 function clearError()
 {
-  console.log("Clear Error");
+  appendLog("Clear Error");
 //      document.querySelector("#ErrMsg").textContent = "";
   chrome.browserAction.setBadgeText({text:""});
 //      document.querySelector("#NASpasswordLabel").style.color = "black";
@@ -154,7 +154,7 @@ function clearError()
 
 function clearMessage()
 {
-  console.log("Clear Message");
+  appendLog("Clear Message");
 //      document.querySelector("#ErrMsg").textContent = "";
   chrome.browserAction.setBadgeText({text:""});
 //      document.querySelector("#NASpasswordLabel").style.color = "black";
@@ -167,30 +167,45 @@ function clearMessage()
 //==================
 function showPopupMessage(msg)
 {
-  console.log("Show msg: "+msg);
+  appendLog("Show msg: "+msg);
   document.querySelector("#ErrMsg").textContent = msg;
   chrome.browserAction.setBadgeText({text:"Msg"});
 
 }
 function clearPopupMessage()
 {
-  console.log("Clear msg");
+  appendLog("Clear msg");
   document.querySelector("#ErrMsg").textContent = "";
   chrome.browserAction.setBadgeText({text:""});
 }
 
 function showPopupError(msg)
 {
-  console.log("Show error: "+msg);
+  appendLog("Show error: "+msg);
   document.querySelector("#ErrMsg").textContent = msg;
   chrome.browserAction.setBadgeText({text:"Err"});
 }
 
 function clearPopupError()
 {
-  console.log("Clear Error");
+  appendLog("Clear Error");
   document.querySelector("#ErrMsg").textContent = "";
   chrome.browserAction.setBadgeText({text:""});
   document.querySelector("#NASpasswordLabel").style.color = "black";
 }
 
+//==================
+// Show messages in Debug Log popup
+//==================
+//function resetLog() {
+//  appendLog("Clear Logs");    document.getElementById('DebugLog').innerHTML = "";
+//}
+
+function appendLog(msg) {
+    let logDiv = document.getElementById('DebugLog')
+
+    if (logDiv)
+        logDiv.innerHTML += "<br>" + msg;
+
+	console.log(msg);
+}

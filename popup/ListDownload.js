@@ -26,11 +26,11 @@ function clearDNLTable()
 {
   var table = document.querySelector('#NASDownloadTable');
   var nbItem = table.rows.length;
-  console.log("Nb of items to del:"+nbItem);
+  appendLog("Nb of items to del:"+nbItem);
   if (table.rows.length > 1) {
       for (let i=1; i< nbItem;i++) {
 
-        console.log("Loop2del "+i+" => item to del:"+table.rows[1].getAttribute("hash"));
+        appendLog("Loop2del "+i+" => item to del:"+table.rows[1].getAttribute("hash"));
         table.rows[1].remove();
       };
     }
@@ -42,7 +42,7 @@ function clearDNLTable()
 function AddQNAPDNLasTable(hashFile ,filename,rateFile) {
   let newItem = filename;
 
-  console.log("AQD New item="+newItem);
+  appendLog("AQD New item="+newItem);
 
   var attrHash = document.createAttribute("hash");
   const fileRow = document.createElement('tr');
@@ -52,9 +52,9 @@ function AddQNAPDNLasTable(hashFile ,filename,rateFile) {
   const fileProgress = document.createElement('progress');
   const listBtn = document.createElement('button');
 
-  console.log(" col1="+fileCol1);
-  console.log(" col2="+fileCol2);
-  console.log("btn="+listBtn);
+  appendLog(" col1="+fileCol1);
+  appendLog(" col2="+fileCol2);
+  appendLog("btn="+listBtn);
 
   fileRow.appendChild(fileCol1);
   fileRow.id = "itemDNL";
@@ -64,7 +64,7 @@ function AddQNAPDNLasTable(hashFile ,filename,rateFile) {
   fileProgress.textContent = rateFile;
   fileProgress.value = rateFile;
   fileProgress.max = "100";
-  console.log("fprog="+fileProgress.value+"/"+fileProgress.max+" innerHTML="+fileProgress.innerHTML);
+  appendLog("fprog="+fileProgress.value+"/"+fileProgress.max+" innerHTML="+fileProgress.innerHTML);
 
   fileCol2.appendChild(fileProgress);
   //fileCol2.textContent = rateFile;
@@ -80,7 +80,7 @@ function AddQNAPDNLasTable(hashFile ,filename,rateFile) {
   tableDNL.appendChild(fileRow);
 
   listBtn.onclick = function(e) {
-    console.log("Press Del="+hashFile);
+    appendLog("Press Del="+hashFile);
     LogAndDelDNL(hashFile);
     //tableDNL.removeChild(fileRow);
   }
@@ -128,10 +128,10 @@ function LoadAndLogAndListDNL() {
         NASprotocol = "http";
       }
 
-    console.log("settings: "+NASprotocol+" "+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/"+res.NASdir);
+    appendLog("settings: "+NASprotocol+" "+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/"+res.NASdir);
 
     if (false) /*(NASsid.length > 0)*/ {
-      console.log("LLLD SID "+NASsid+" already avaialble")
+      appendLog("LLLD SID "+NASsid+" already avaialble")
       listDNL();
     }
     else {
@@ -152,32 +152,32 @@ async function LoadAndLogAndListDNL_bis() {
     clearPopupError();
     await getSettings();
 
-    console.log(" LogAndListDNL_bis : settings: "+NASprotocol+" "+NASlogin+":"+NASpassword+"@"+NASaddr+":"+NASport+" temp="+NAStempdir+" move="+NASdir);
+    appendLog(" LogAndListDNL_bis : settings: "+NASprotocol+" "+NASlogin+":"+NASpassword+"@"+NASaddr+":"+NASport+" temp="+NAStempdir+" move="+NASdir);
 /*
     try
         {
         resLogin = await loginNAS();
-        console.log("LogAndListDNL_bis: called loginNAS="+resLogin);
+        appendLog("LogAndListDNL_bis: called loginNAS="+resLogin);
         } 
     catch(err)
         {
-            console.log("LoadAndLogAndListDNL_bis: Bad NAS address or login")
+            appendLog("LoadAndLogAndListDNL_bis: Bad NAS address or login")
             showPopupError("Bad NAS address or login")
         }
 
     if (resLogin === true)*/
     {
       // Call addUrl with SID & URL
-      console.log("LogAndListDNL_bis: async fct now calls addUrl with SID="+NASsid+" & URL");
+      appendLog("LogAndListDNL_bis: async fct now calls addUrl with SID="+NASsid+" & URL");
 
       let resSend = await ListQNAPDNL(NASsid);
       if (resSend === true )
       {
-        console.log("LogAndListDNL_bis: ListQNAPDNL OK with ");
+        appendLog("LogAndListDNL_bis: ListQNAPDNL OK with ");
       }
       else
       {
-        console.log("LogAndListDNL_bis: ListQNAPDNL error");
+        appendLog("LogAndListDNL_bis: ListQNAPDNL error");
       }
     }
 }
@@ -186,11 +186,11 @@ async function LoadAndLogAndListDNL_bis() {
  Add download task using SID
 */
 async function ListQNAPDNL(sid) {
-    console.log("ListQNAPDNL: SID="+sid);
+    appendLog("ListQNAPDNL: SID="+sid);
 
-    console.log("Launch QNAP Query DS Tasks");
+    appendLog("Launch QNAP Query DS Tasks");
     var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Query";
-    console.log("Request to send:"+requete);
+    appendLog("Request to send:"+requete);
     var data = "sid="+sid+"&limit=0&status=all&type=all";
 
     let response = await fetch(requete, {
@@ -204,26 +204,26 @@ async function ListQNAPDNL(sid) {
     
     if(response.ok ) {
         var jsonData = await response.json(); //JSON.parse(this.responseText);
-        console.log("ListQNAPDNL: fetch response: "+JSON.stringify(jsonData));
+        appendLog("ListQNAPDNL: fetch response: "+JSON.stringify(jsonData));
 
         // an error occured
         if (jsonData.error > 0)
             {
-                console.log("ListQNAPDNL: error code="+jsonData.error+ " reason="+jsonData.reason);
+                appendLog("ListQNAPDNL: error code="+jsonData.error+ " reason="+jsonData.reason);
                 
                 // check if session expiration error
                 if ( jsonData.error === 5)
                     {
-                        console.log("ListQNAPDNL:session expired: try to relogin");
+                        appendLog("ListQNAPDNL:session expired: try to relogin");
    
                     try
                         {
                         resLogin = await loginNAS();
-                        console.log("LogAndListDNL_bis: called loginNAS="+resLogin);
+                        appendLog("LogAndListDNL_bis: called loginNAS="+resLogin);
                         } 
                     catch(err)
                         {
-                            console.log("LoadAndLogAndListDNL_bis: Bad NAS address or login")
+                            appendLog("LoadAndLogAndListDNL_bis: Bad NAS address or login")
                             showPopupError("Bad NAS address or login");
                         }
 
@@ -232,11 +232,11 @@ async function ListQNAPDNL(sid) {
                             let resSend = await ListQNAPDNL(NASsid);
                             if (resSend === true )
                             {
-                                console.log("LogAndListDNL_bis: ListQNAPDNL OK with ");
+                                appendLog("LogAndListDNL_bis: ListQNAPDNL OK with ");
                             }
                             else
                             {
-                                console.log("LogAndListDNL_bis: ListQNAPDNL error");
+                                appendLog("LogAndListDNL_bis: ListQNAPDNL error");
                             }
                             return resSend;
                         }
@@ -249,13 +249,13 @@ async function ListQNAPDNL(sid) {
             }
         
         clearDNLTable();
-        console.log("Total tasks:"+jsonData.total);
-        console.log("Total downloading:"+jsonData.status.downloading);
+        appendLog("Total tasks:"+jsonData.total);
+        appendLog("Total downloading:"+jsonData.status.downloading);
         setJobNb(jsonData.status.downloading);
         for (i=0; i < jsonData.total ; i++) {
             if ( jsonData.data[i].state != "5" && jsonData.data[i].state != "4") {
-              console.log("En cours ["+i+"].status : "+jsonData.data[i].state+" - "+jsonData.data[i].source_name);
-              console.log("Rate ["+i+"] : "+jsonData.data[i].total_down+" / "+jsonData.data[i].size);
+              appendLog("En cours ["+i+"].status : "+jsonData.data[i].state+" - "+jsonData.data[i].source_name);
+              appendLog("Rate ["+i+"] : "+jsonData.data[i].total_down+" / "+jsonData.data[i].size);
               let doneDNL = parseInt(jsonData.data[i].total_down);
               let todoDNL = parseInt(jsonData.data[i].size);
               let rateDNL = 0;
@@ -269,27 +269,27 @@ async function ListQNAPDNL(sid) {
                 rateDNL = 0;
               }
 
-              console.log("Rate ["+i+"] : "+rateDNL);
-              console.log("Rate"+rateDNL.toString());
+              appendLog("Rate ["+i+"] : "+rateDNL);
+              appendLog("Rate"+rateDNL.toString());
 //                    AddQNAPDNL(getFilenameOfURL(jsonData.data[i].source));
 
               let TabElt = document.querySelector("[hash=\""+hashDNL+"\"]");
-              console.log("Query Result ("+fnDNL+" - "+hashDNL+") = "+TabElt);
+              appendLog("Query Result ("+fnDNL+" - "+hashDNL+") = "+TabElt);
 
 
               if ( TabElt == null)
               {
-                console.log("Create="+fnDNL+" - "+hashDNL);
+                appendLog("Create="+fnDNL+" - "+hashDNL);
                 AddQNAPDNLasTable(hashDNL,getFilenameOfURL(fnDNL),rateDNL.toString());
               }
               else {
-                console.log("Doublon="+fnDNL+" - "+hashDNL);
+                appendLog("Doublon="+fnDNL+" - "+hashDNL);
               }
 
                 //AddQNAPDNL(jsonData.data[i].source_name); // Only filled if actually downloading state = 104
             }
             else {
-              //console.log("Fini["+i+"].status : "+jsonData.data[i].state+" - "+jsonData.data[i].source_name);
+              //appendLog("Fini["+i+"].status : "+jsonData.data[i].state+" - "+jsonData.data[i].source_name);
 
             }
         }
@@ -304,12 +304,12 @@ async function ListQNAPDNL(sid) {
    return filename from URL
 */
 function getFilenameOfURL(url) {
-  console.log("gFN URL="+url);
+  appendLog("gFN URL="+url);
 
   var flna = url.split("/");
   var fileURL = flna[flna.length-1];
 
-  console.log("fileURL="+fileURL);
+  appendLog("fileURL="+fileURL);
 
   return(fileURL);
 }
@@ -328,29 +328,29 @@ function LogAndDelDNL(hash) {
     var xhr = new XMLHttpRequest();
 
     data = "user="+NASlogin+"&pass="+btoa(NASpassword);
-    console.log("param login ="+data);
+    appendLog("param login ="+data);
     xhr.withCredentials = true;
 
     xhr.addEventListener("readystatechange", function() {
         if(this.readyState === 4) {
-          console.log(this.responseText);
+          appendLog(this.responseText);
           var obj = JSON.parse(this.responseText);
-          console.log("SID="+obj.sid);
+          appendLog("SID="+obj.sid);
           //NASsid = obj.sid;
           delDNL(obj.sid,hash);
         }
     });
 
-    console.log("Lancement QNAP Login DS SID");
+    appendLog("Lancement QNAP Login DS SID");
     var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login";
-    console.log("Request to send:"+requete);
+    appendLog("Request to send:"+requete);
     xhr.open("POST", requete);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 
     xhr.send(data);
   }
   else {
-    console.log("LDD SID "+NASsid+" already avaialble")
+    appendLog("LDD SID "+NASsid+" already avaialble")
     //delDNL(NASsid,hash);
   }
 }
@@ -359,8 +359,8 @@ function LogAndDelDNL(hash) {
 */
 function delDNL(sid,hash) {
     //var data = "sid="+sid+"&temp=Download&move=Multimedia%2FTemp&url=http%3A%2F%2Freleases.ubuntu.com%2F18.04%2Fubuntu-18.04.4-desktop-amd64.iso";
-    console.log("SID="+sid);
-    console.log("Hash="+hash);
+    appendLog("SID="+sid);
+    appendLog("Hash="+hash);
 
     var data = "sid="+sid+"&hash="+hash;
 
@@ -369,23 +369,23 @@ function delDNL(sid,hash) {
 
     xhr.addEventListener("readystatechange", function() {
         if(this.readyState === 4) {
-            console.log(this.responseText);
+            appendLog(this.responseText);
             var jsonData = JSON.parse(this.responseText);
 
-            console.log("error:"+jsonData.error);
+            appendLog("error:"+jsonData.error);
 
-            console.log("EndOfDel=>List (SID ="+sid+"  )")
+            appendLog("EndOfDel=>List (SID ="+sid+"  )")
             setTimeout( ListQNAPDNL, 500, sid);
       }
 
     });
 
-    console.log("Lancement QNAP Remove Task hash:"+hash);
+    appendLog("Lancement QNAP Remove Task hash:"+hash);
     var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Remove";
-    console.log("Request to send:"+requete);
+    appendLog("Request to send:"+requete);
     xhr.open("POST", requete);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    console.log(xhr);
+    appendLog(xhr);
     xhr.send(data);
 
 }

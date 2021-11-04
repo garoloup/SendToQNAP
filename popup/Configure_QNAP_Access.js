@@ -28,12 +28,12 @@ function saveOptions(e) {
 
 function restoreOptions() {
   function onError(error) {
-    console.log(`Error: ${error}`);
+    appendLog(`Error: ${error}`);
   }
 
   function setCurrentSecureValue(res){
       document.querySelector("#NASsecure").value = res.NASsecurevalue || "Secure" ;
-      console.log("Set DOM "+document.querySelector("#NASsecure").value+" with "+res.NASsecurevalue || "Secure")
+      appendLog("Set DOM "+document.querySelector("#NASsecure").value+" with "+res.NASsecurevalue || "Secure")
   }
 
 //     chrome.storage.local.get('NASsecurevalue',setCurrentSecureValue);
@@ -41,7 +41,7 @@ function restoreOptions() {
 
   function setCurrentSecure(res){
          document.querySelector("#NASsecure").checked = res.NASsecure ;
-         console.log("Set DOM "+document.querySelector("#NASsecure").checked+" with "+res.NASsecure )
+         appendLog("Set DOM "+document.querySelector("#NASsecure").checked+" with "+res.NASsecure )
      }
 
         chrome.storage.local.get('NASsecure',setCurrentSecure);
@@ -49,35 +49,35 @@ function restoreOptions() {
 
  function setCurrentAddress(res){
      document.querySelector("#NASaddress").value = res.NASaddress || "192.168.0.2" ;
-     console.log("Set DOM "+document.querySelector("#NASaddress").value+" with "+res.NASaddress || "192.168.0.2")
+     appendLog("Set DOM "+document.querySelector("#NASaddress").value+" with "+res.NASaddress || "192.168.0.2")
  }
 
     chrome.storage.local.get('NASaddress',setCurrentAddress);
 
 function setCurrentPort(res){
      document.querySelector("#NASport").value = res.NASport || "80" ;
-     console.log("Set DOM "+document.querySelector("#NASport").value+" with "+res.NASport || "80")
+     appendLog("Set DOM "+document.querySelector("#NASport").value+" with "+res.NASport || "80")
  }
 
     chrome.storage.local.get('NASport',setCurrentPort);
 
  function setCurrentLogin(res){
      document.querySelector("#NASlogin").value = res.NASlogin || "admin" ;
-      console.log("Set DOM "+document.querySelector("#NASlogin").value+" with "+res.NASlogin || "admin" )
+      appendLog("Set DOM "+document.querySelector("#NASlogin").value+" with "+res.NASlogin || "admin" )
 }
 
     chrome.storage.local.get('NASlogin',setCurrentLogin);
 
 function setCurrentPassword(res){
      document.querySelector("#NASpassword").value = res.NASpassword || "aabbccdd" ;
-      console.log("Set DOM "+document.querySelector("#NASpassword").value+" with "+res.NASpassword || "aabbccdd")
+      appendLog("Set DOM "+document.querySelector("#NASpassword").value+" with "+res.NASpassword || "aabbccdd")
 }
 
     chrome.storage.local.get('NASpassword',setCurrentPassword);
 
     function setCurrentTempDir(res){
          document.querySelector("#NAStempdir").value = res.NAStempdir || "Download" ;
-          console.log("Set DOM "+document.querySelector("#NAStempdir").value+" with "+res.NAStempdir || "Download" )
+          appendLog("Set DOM "+document.querySelector("#NAStempdir").value+" with "+res.NAStempdir || "Download" )
     }
 
         chrome.storage.local.get('NAStempdir',setCurrentTempDir);
@@ -85,7 +85,7 @@ function setCurrentPassword(res){
 
 function setCurrentDir(res){
      document.querySelector("#NASdir").value = res.NASdir || "Public/Multimedia/Films" ;
-      console.log("Set DOM "+document.querySelector("#NASdir").value+" with "+res.NASdir || "Public/Multimedia/Films" )
+      appendLog("Set DOM "+document.querySelector("#NASdir").value+" with "+res.NASdir || "Public/Multimedia/Films" )
 }
 
     chrome.storage.local.get('NASdir',setCurrentDir);
@@ -106,7 +106,7 @@ function changeNASInfo(newInfo)
 
 function toggleHideMenu() {
   var x = document.querySelector("#NASSettingForm");
-//  console.log("Section id "+id+" is "x.className.indexOf("showsection"))
+//  appendLog("Section id "+id+" is "x.className.indexOf("showsection"))
   if (x.className.indexOf("hidesection") == -1) {
     x.className += "hidesection";
   } else {
@@ -115,32 +115,62 @@ function toggleHideMenu() {
 }
 document.querySelector("#SettingsMenu").addEventListener("click", toggleHideMenu);
 
+function toggleHideDebug() {
+  var x = document.querySelector("#DebugLog");
+
+  if (x.className.indexOf("hidesection") == -1) {
+    x.className += "hidesection";
+  } else {
+    x.className = x.className.replace("hidesection", "");
+  }
+}
+document.querySelector("#DebugMenu").addEventListener("click", toggleHideDebug);
+
+function resetLog() {
+  appendLog("Clear Logs");    document.getElementById('DebugLog').innerHTML = "";
+}
+
+document.querySelector("#ClearLogs").addEventListener("click", resetLog);
+
+
+function copyLogDivToClipboard() {
+    var range = document.createRange();
+    range.selectNode(document.getElementById("DebugLog"));
+    window.getSelection().removeAllRanges(); // clear current selection
+    window.getSelection().addRange(range); // to select text
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();// to deselect
+}
+
+
+document.querySelector("#copyLogs").addEventListener("click", copyLogDivToClipboard);
+
 
 /*==================
 function showMessage(msg)
 {
-  console.log("Show msg: "+msg);
+  appendLog("Show msg: "+msg);
   document.querySelector("#ErrMsg").textContent = msg;
   chrome.browserAction.setBadgeText({text:"Msg"});
 
 }
 function clearMessage()
 {
-  console.log("Clear msg");
+  appendLog("Clear msg");
   document.querySelector("#ErrMsg").textContent = "";
   chrome.browserAction.setBadgeText({text:""});
 }
 
 function showError(msg)
 {
-  console.log("Show error: "+msg);
+  appendLog("Show error: "+msg);
   document.querySelector("#ErrMsg").textContent = msg;
   chrome.browserAction.setBadgeText({text:"Err"});
 }
 
 function clearError()
 {
-  console.log("Clear Error");
+  appendLog("Clear Error");
   document.querySelector("#ErrMsg").textContent = "";
   chrome.browserAction.setBadgeText({text:""});
   document.querySelector("#NASpasswordLabel").style.color = "black";
@@ -176,22 +206,22 @@ function testConnection()
       }
       xhr.timeout = 2000;
 
-    console.log("settings "+res.NASsecure+" :"+NASprotocol+"://"+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/"+res.NASdir);
+    appendLog("settings "+res.NASsecure+" :"+NASprotocol+"://"+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/"+res.NASdir);
         xhr.addEventListener("error", (e) => {
-          console.log(e);
+          appendLog(e);
           showError("Err");
           showPopupError(e.message);//+": "+e.error.toString());
 
         });
         xhr.addEventListener("timeout", () => {
-          console.log(NASaddr+" not responding");
+          appendLog(NASaddr+" not responding");
           showError("Err");
           showPopupError(NASaddr+" not responding");//+": "+e.error.toString());
 
         });
         xhr.addEventListener("readystatechange", function() {
         if(this.readyState === 4) {
-          console.log(this.responseText);
+          appendLog(this.responseText);
           if (this.status === 200)
           {
             if (this.responseText != null && this.responseText.length > 0)
@@ -201,24 +231,24 @@ function testConnection()
   //            var jsonObject = xmlToJson.parse(this.responseText);
 
               var jsonObject = xmlToJSON.parseString(this.responseText);
-              console.log("json="+jsonObject);
+              appendLog("json="+jsonObject);
 
               let NASModel = jsonObject.QDocRoot[0].model[0].modelName[0]._text;
-              console.log("model Name= "+NASModel);
+              appendLog("model Name= "+NASModel);
 
               let NASDisplayName = jsonObject.QDocRoot[0].model[0].displayModelName[0]._text;
-              console.log("model displayModelName= "+NASDisplayName);
+              appendLog("model displayModelName= "+NASDisplayName);
 
-              console.log("fmwr version= "+jsonObject.QDocRoot[0].firmware[0].version[0]._text);
+              appendLog("fmwr version= "+jsonObject.QDocRoot[0].firmware[0].version[0]._text);
 
               let NASHostname = jsonObject.QDocRoot[0].hostname[0]._text;
-              console.log("hostname = "+NASHostname);
+              appendLog("hostname = "+NASHostname);
 
               let NASIPinfo = jsonObject.QDocRoot[0].HTTPHost[0]._text;
-              console.log("HTTP = "+NASIPinfo);
+              appendLog("HTTP = "+NASIPinfo);
 
               let NASPortInfo = jsonObject.QDocRoot[0].webAccessPort[0]._text;
-              console.log("port = "+NASPortInfo);
+              appendLog("port = "+NASPortInfo);
               changeNASInfo(NASHostname+" "+NASDisplayName+" "+NASIPinfo+":"+NASPortInfo);
    
             }
@@ -240,13 +270,13 @@ function testConnection()
         }
     });
     var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/cgi-bin/authLogin.cgi";
-    console.log("Request to send:"+requete);
+    appendLog("Request to send:"+requete);
     try {
       xhr.open("GET", requete);
 
       xhr.send();
     } catch (e) {
-      console.log(e);
+      appendLog(e);
       showPopupError(e.message);//+": "+e.error.toString());
     } finally {
 
