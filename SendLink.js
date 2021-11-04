@@ -5,7 +5,7 @@ Create context menu item
 chrome.contextMenus.create({
     id: "copy-link-to-clipboard",
     title: chrome.i18n.getMessage("menuContextSendLink"),
-contexts: ["link"],
+    contexts: ["link"]
 },onCreated);
 
 /* +++++++++++++++++++++++++++++++++
@@ -83,6 +83,7 @@ var NAStempdir = "";
 var NASdir = "";
 var NASsid = "";
 var NASDNLNb = 0;
+var refreshTimer = 0;
 
 function onError(error) {
     console.log(`Error: ${error}`);
@@ -264,10 +265,21 @@ async function watchDownloads()
     showMessage(NbDNL.toString());
     if (NbDNL > 0)
         {
-            await timeout(2000);
-            watchDownloads();            
+            if (refreshTimer == 0)
+                {
+                    refreshTimer = setInterval(watchDownloads, 2000);
+                    console.log("watchDownloads: launch interval ID  :"+refreshTimer);
+                }
+            else
+                {
+                    console.log("watchDownloads: Already running interval ID  :"+refreshTimer);
+                }
         }
     else{
+            console.log("watchDownloads: kill interval ID  :"+refreshTimer);
+            clearInterval(refreshTimer) ;
+            refreshTimer = 0;
+
             await timeout(2000);
             clearMessage();
     }
