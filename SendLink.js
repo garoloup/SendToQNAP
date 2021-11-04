@@ -84,6 +84,7 @@ var NASdir = "";
 var NASsid = "";
 var NASDNLNb = 0;
 var refreshTimer = 0;
+var totalNbOfDNL =0;
 
 function onError(error) {
     console.log(`Error: ${error}`);
@@ -233,6 +234,7 @@ async function sendURL(sid,url)
       if (responseData.error === 0)
       {
         showMessage("+1");
+        totalNbOfDNL++;
         // Clear badge in 5s
         setTimeout( clearMessage, 5000);
         setTimeout( watchDownloads, 5500);
@@ -263,6 +265,18 @@ async function watchDownloads()
 
     let NbDNL = await getQNAPDNLNb(NASsid);
     showMessage(NbDNL.toString());
+
+    // When nb of running download decreases
+    if (NbDNL < totalNbOfDNL) {
+        var decrease = NbDNL-totalNbOfDNL;
+        console.log("watchDownloads: decrease downloads : "+decrease);
+        setTimeout(showMessage,0, decrease.toString());
+        totalNbOfDNL = NbDNL;
+        // Clear badge in 5s
+        setTimeout( clearMessage, 5000);
+        setTimeout( watchDownloads, 5500);
+    }
+
     if (NbDNL > 0)
         {
             if (refreshTimer == 0)
