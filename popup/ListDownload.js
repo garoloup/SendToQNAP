@@ -170,14 +170,14 @@ async function LoadAndLogAndListDNL_bis() {
       // Call addUrl with SID & URL
       console.log("LogAndListDNL_bis: async fct now calls addUrl with SID="+NASsid+" & URL");
 
-      let resSend = await ListQNAPDNL_bis(NASsid);
+      let resSend = await ListQNAPDNL(NASsid);
       if (resSend === true )
       {
-        console.log("LogAndListDNL_bis: ListQNAPDNL_bis OK with ");
+        console.log("LogAndListDNL_bis: ListQNAPDNL OK with ");
       }
       else
       {
-        console.log("LogAndListDNL_bis: ListQNAPDNL_bis error");
+        console.log("LogAndListDNL_bis: ListQNAPDNL error");
       }
     }
 }
@@ -185,8 +185,8 @@ async function LoadAndLogAndListDNL_bis() {
 /* +++++++++++++++++++++++++++++++++
  Add download task using SID
 */
-async function ListQNAPDNL_bis(sid) {
-    console.log("ListQNAPDNL_bis: SID="+sid);
+async function ListQNAPDNL(sid) {
+    console.log("ListQNAPDNL: SID="+sid);
 
     console.log("Launch QNAP Query DS Tasks");
     var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Query";
@@ -204,17 +204,17 @@ async function ListQNAPDNL_bis(sid) {
     
     if(response.ok ) {
         var jsonData = await response.json(); //JSON.parse(this.responseText);
-        console.log("ListQNAPDNL_bis: fetch response: "+JSON.stringify(jsonData));
+        console.log("ListQNAPDNL: fetch response: "+JSON.stringify(jsonData));
 
         // an error occured
         if (jsonData.error > 0)
             {
-                console.log("ListQNAPDNL_bis: error code="+jsonData.error+ " reason="+jsonData.reason);
+                console.log("ListQNAPDNL: error code="+jsonData.error+ " reason="+jsonData.reason);
                 
                 // check if session expiration error
                 if ( jsonData.error === 5)
                     {
-                        console.log("ListQNAPDNL_bis:session expired: try to relogin");
+                        console.log("ListQNAPDNL:session expired: try to relogin");
    
                     try
                         {
@@ -229,14 +229,14 @@ async function ListQNAPDNL_bis(sid) {
 
                     if (resLogin === true)
                         {
-                            let resSend = await ListQNAPDNL_bis(NASsid);
+                            let resSend = await ListQNAPDNL(NASsid);
                             if (resSend === true )
                             {
-                                console.log("LogAndListDNL_bis: ListQNAPDNL_bis OK with ");
+                                console.log("LogAndListDNL_bis: ListQNAPDNL OK with ");
                             }
                             else
                             {
-                                console.log("LogAndListDNL_bis: ListQNAPDNL_bis error");
+                                console.log("LogAndListDNL_bis: ListQNAPDNL error");
                             }
                             return resSend;
                         }
