@@ -88,26 +88,37 @@ async function getQNAPDNLList(sid) {
     var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Query";
     appendLog("Request to send:"+requete);
 
-    let response = await fetch(requete, {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-        },
-        body: data,
-        credentials: 'include'
-    });
-    
-    let responseData = await response.json();
-    
-    if (response.ok && responseData.error == 0) {
-        appendLog("getQNAPDNLList: reponse ok = "+responseData);
-        return(responseData);
+    try {
+        let response = await fetch(requete, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+            },
+            body: data,
+            credentials: 'include'
+        });
+
+        // if HTTP retiurn code is not 2xx
+        if ( !response.ok) {
+            throw new Error("getQNAPDNLList: HTTP Error ${response.status}, ${response.statusText}");
+        }
+
+        let responseData = await response.json();
+
+        if (response.ok && responseData.error == 0) {
+            appendLog("getQNAPDNLList: reponse ok = "+responseData);
+            return(responseData);
+        }
+        else {
+            appendLog("getQNAPDNLList: reponse error = "+responseData.error+"error reason = "+responseData.reason);
+            throw(responseData.reason);
+            return [];
+        }
+
+    } catch (e) {
+        appendLog(e);
     }
-    else {
-        appendLog("getQNAPDNLList: reponse error = "+responseData.error+"error reason = "+responseData.reason);
-        throw(responseData.reason);
-        return [];
-    }
+    
 
 }
 
