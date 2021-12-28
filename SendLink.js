@@ -283,6 +283,7 @@ async function watchDownloads()
                 {
                     refreshTimer = setInterval(watchDownloads, 2000);
                     console.log("watchDownloads: launch interval ID  :"+refreshTimer);
+                    startIndicator2();
                 }
             else
                 {
@@ -293,6 +294,7 @@ async function watchDownloads()
             console.log("watchDownloads: kill interval ID  :"+refreshTimer);
             clearInterval(refreshTimer) ;
             refreshTimer = 0;
+            removeIndicator();
 
             await timeout(2000);
             clearMessage();

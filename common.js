@@ -220,3 +220,107 @@ function appendLog(msg) {
 
 	console.log(msg);
 }
+
+
+//==================
+// Set Progress indicator in badge
+//==================
+
+let IntervalID;
+
+function startIndicator()
+{
+    appendLog("Start Indicator");
+    var context=document.createElement('canvas').getContext('2d');
+    var start = new Date();
+    var lines = 16,
+    cW = 40,
+    cH = 40;
+
+    IntervalID = setInterval(function() {
+      var rotation = parseInt(((new Date() - start) / 1000) * lines) / lines;
+      context.save();
+      context.clearRect(0, 0, cW, cH);
+      context.translate(cW / 2, cH / 2);
+      context.rotate(Math.PI * 2 * rotation);
+      for (var i = 0; i < lines; i++) {
+        context.beginPath();
+        context.rotate(Math.PI * 2 / lines);
+        context.moveTo(cW / 10, 0);
+        context.lineTo(cW / 4, 0);
+        context.lineWidth = cW / 30;
+        context.strokeStyle = 'rgba(0, 0, 0,' + i / lines + ')';
+        context.stroke();
+      }
+
+    var imageData = context.getImageData(10, 10, 19, 19);
+      chrome.browserAction.setIcon({
+        imageData: imageData
+      });
+
+    context.restore();
+    }, 1000 / 30);
+}
+
+
+function startIndicator2()
+{
+    appendLog("Start Indicator");
+    var context=document.createElement('canvas').getContext('2d');
+    var start = new Date();
+    var cpt = 0;
+    var lines = 16,
+    cW = 32,
+    cH = 32;
+    let img = new Image();
+
+    img.onload = function() {
+        
+    
+        IntervalID = setInterval(function() {
+//            var delta = new Date() - start;
+//            var rotation = parseInt(((new Date() - start) / 1000) * lines) / lines;
+//            console.log("delta="+delta+" rotation="+rotation);
+            var rotation = (cpt++) / lines;
+//            console.log("cpt="+cpt+" rotation="+rotation);
+            context.save();
+            context.clearRect(0, 0, cW, cH);
+            context.drawImage(img,0,0);
+            context.translate(cW / 2, cH / 2);
+            i = lines;
+            context.rotate(Math.PI * 2 * rotation);
+    //        for (var i = 0; i < lines; i++) {
+                context.beginPath();
+                context.rotate(Math.PI * 2 / lines);
+                context.moveTo(cW / 10, 0);
+                context.lineTo(cW * 0.5, 0);
+                context.lineWidth = 4;
+                context.strokeStyle = 'rgba(0, 0, 0,' + i / lines + ')';
+                context.stroke();
+    //        }
+
+        var imageData = context.getImageData(0, 0, cW, cH)//;(10, 10, 19, 19);
+          chrome.browserAction.setIcon({
+            imageData: imageData
+          });
+
+        context.restore();
+        }, 1000 / 10);
+        
+    };
+    img.src = "icons/32_download.png";
+}
+
+function removeIndicator()
+{
+    clearInterval(IntervalID);
+    
+    appendLog("Stop Indicator")
+    chrome.browserAction.setIcon({
+        path : "icons/32_download.png"
+      });  
+    chrome.browserAction.setIcon({
+        path : "icons/32_download.png",
+        path : "icons/48_download.png"
+      });  
+}
