@@ -289,13 +289,18 @@ function startIndicator2()
             context.translate(cW / 2, cH / 2);
             i = lines;
             context.rotate(Math.PI * 2 * rotation);
+            //context.lineCap = 'butt';
     //        for (var i = 0; i < lines; i++) {
                 context.beginPath();
                 context.rotate(Math.PI * 2 / lines);
                 context.moveTo(cW / 10, 0);
                 context.lineTo(cW * 0.5, 0);
+                context.strokeStyle = "black";//'rgba(0, 0, 0,' + i / lines + ')';
+                context.lineWidth = 8;
+                context.stroke();
+                context.strokeStyle = "white";//'rgba(0, 0, 0,' + i / lines + ')';
                 context.lineWidth = 4;
-                context.strokeStyle = 'rgba(0, 0, 0,' + i / lines + ')';
+//                context.lineTo(-cW * 0.3, 0);            
                 context.stroke();
     //        }
 
