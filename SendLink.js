@@ -5,7 +5,7 @@ Create context menu item
 chrome.contextMenus.create({
     id: "copy-link-to-clipboard",
     title: chrome.i18n.getMessage("menuContextSendLink"),
-    contexts: ["link"]
+    contexts: ["link","selection"]
 },onCreated);
 
 /* +++++++++++++++++++++++++++++++++
@@ -18,9 +18,21 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         // Examples: text and HTML to be copied.
         const text = "This is text: " + info.linkUrl;
         // Always HTML-escape external input to avoid XSS.
-        const safeUrl = escapeHTML(info.linkUrl);
-        const html = `This is HTML: <a href="${safeUrl}">${safeUrl}</a>`;
+        var safeUrl ;
+        
+        appendLog("info received in context menu: linkURL = ["+info.linkUrl+"] or text seelction=["+info.selectionText+"]");
+        
+        // if value is not: null, undefined, NaN, empty string (""), 0 orfalse
+        if (info.linkUrl) {
+            safeUrl = escapeHTML(info.linkUrl);
+            }
+        else if (info.selectionText) {
+            safeUrl = escapeHTML(info.selectionText.trim());
+            }
+        else
+            return;
 
+        
         console.log("Send to QNAP URL="+safeUrl);
         LoadAndLogAndAddUrl(safeUrl);
     }
