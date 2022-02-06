@@ -265,50 +265,5 @@ async function sendURL(sid,url)
   }
 }
 
-/* +++++++++++++++++++++++++++++++++
- Refresh Task Nb periodically
-*/
-
-async function watchDownloads()
-{
-//    let DNLList = await getQNAPDNLList(NASsid);
-//    let NbDNL = DNLList.status.downloading;
-//    showMessage(NbDNL.toString());
-
-    let NbDNL = await getQNAPDNLNb(NASsid);
-    showMessage(NbDNL.toString());
-
-    // When nb of running download decreases
-    if (NbDNL < totalNbOfDNL) {
-        var decrease = NbDNL-totalNbOfDNL;
-        console.log("watchDownloads: decrease downloads : "+decrease);
-        setTimeout(showMessage,0, decrease.toString());
-        totalNbOfDNL = NbDNL;
-        // Clear badge in 5s
-        setTimeout( clearMessage, 5000);
-        setTimeout( watchDownloads, 5500);
-    }
-
-    if (NbDNL > 0)
-        {
-            if (refreshTimer == 0)
-                {
-                    refreshTimer = setInterval(watchDownloads, 2000);
-                    console.log("watchDownloads: launch interval ID  :"+refreshTimer);
-                }
-            else
-                {
-                    console.log("watchDownloads: Already running interval ID  :"+refreshTimer);
-                }
-        }
-    else{
-            console.log("watchDownloads: kill interval ID  :"+refreshTimer);
-            clearInterval(refreshTimer) ;
-            refreshTimer = 0;
-
-            await timeout(2000);
-            clearMessage();
-    }
-}
 
 
