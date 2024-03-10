@@ -10,7 +10,7 @@
   },
 
   "menuContextSendLink": {
-    "message": "[DEV] Send Link to QNAP Download station",
+    "message": "Send Link to QNAP Download station",
     "description": "Send Link to QNAP Download station"
   }
     
