@@ -1,7 +1,7 @@
 {
 
   "manifest_version": 2,
-  "name": "SendToQnap",
+  "name": "SendToQnap DEV",
   "version": "2.6",
   "description": "Send a url to QNAP downloadstation",
   "default_locale": "en",
@@ -39,7 +39,7 @@
 
   "browser_action": {
     "default_icon": "icons/32_download.png",
-    "default_title": "Send To QNAP",
+    "default_title": "Send To QNAP DEV",
     "default_popup": "popup/Configure_QNAP_Access.html"
   },
 

@@ -39,7 +39,7 @@ function clearDNLTable()
 /* +++++++++++++++++++++++++++++++++
  Add a new DOM element with one retrieved job defined by its QNAP hash, filename and already downloaded file
 */
-function AddQNAPDNLasTable(hashFile ,filename,rateFile) {
+async function AddQNAPDNLasTable(hashFile ,filename,rateFile) {
   let newItem = filename;
 
   appendLog("AQD New item="+newItem);
@@ -79,9 +79,9 @@ function AddQNAPDNLasTable(hashFile ,filename,rateFile) {
   fileRow.setAttributeNode(attrHash);
   tableDNL.appendChild(fileRow);
 
-  listBtn.onclick = function(e) {
+  listBtn.onclick = async function(e) {
     appendLog("Press Del="+hashFile);
-    LogAndDelDNL(hashFile);
+    await LogAndDelDNL(hashFile);
     //tableDNL.removeChild(fileRow);
   }
 
@@ -104,14 +104,6 @@ initListSection();
 Load NAS settings and call next steps
 */
 function LoadAndLogAndListDNL() {
-//  var gettingAllStorageItems = browser.storage.local.get(null);
-/*  var gettingAllStorageItems = chrome.storage.local.get(null);
-  gettingAllStorageItems.then((res) => {
-      NASaddr = res.NASaddress;
-      NASport = res.NASport;
-      NASlogin = res.NASlogin;
-      NASpassword = res.NASpassword;
-      NASdir = res.NASdir;*/
 
     chrome.storage.local.get(null,function(res) {
       NASaddr = res.NASaddress;
@@ -193,14 +185,15 @@ async function ListQNAPDNL(sid) {
     appendLog("Request to send:"+requete);
     var data = "sid="+sid+"&limit=0&status=all&type=all";
 
-    let response = await fetch(requete, {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-        },
-        body: data
+    try {
+        let response = await fetch(requete, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+            },
+            body: data
         }
-    )
+                                  )
     
     if(response.ok ) {
         var jsonData = await response.json(); //JSON.parse(this.responseText);
@@ -280,7 +273,7 @@ async function ListQNAPDNL(sid) {
               if ( TabElt == null)
               {
                 appendLog("Create="+fnDNL+" - "+hashDNL);
-                AddQNAPDNLasTable(hashDNL,getFilenameOfURL(fnDNL),rateDNL.toString());
+                await AddQNAPDNLasTable(hashDNL,getFilenameOfURL(fnDNL),rateDNL.toString());
               }
               else {
                 appendLog("Doublon="+fnDNL+" - "+hashDNL);
@@ -294,10 +287,12 @@ async function ListQNAPDNL(sid) {
             }
         }
     }
+    } catch (e) {
+            //Catch Statement
+        }
+
     return true;
 }
-
-// WIP
 
 
 /* +++++++++++++++++++++++++++++++++
@@ -318,74 +313,70 @@ function getFilenameOfURL(url) {
 /* +++++++++++++++++++++++++++++++++
 Login into NAS and get SID for next step
 */
-function LogAndDelDNL(hash) {
+async function LogAndDelDNL(hash) {
   var data = "";
-  //    var data = "user=admin&pass=bm9ncm9pMDE%3D";
-
-  // cannot share SID in that way
-  if (true) //(NASsid.length == 0)
-  {
-    var xhr = new XMLHttpRequest();
 
     data = "user="+NASlogin+"&pass="+btoa(NASpassword);
     appendLog("param login ="+data);
-    xhr.withCredentials = true;
 
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
-          appendLog(this.responseText);
-          var obj = JSON.parse(this.responseText);
-          appendLog("SID="+obj.sid);
-          //NASsid = obj.sid;
-          delDNL(obj.sid,hash);
-        }
-    });
-
-    appendLog("Lancement QNAP Login DS SID");
     var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login";
     appendLog("Request to send:"+requete);
-    xhr.open("POST", requete);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 
-    xhr.send(data);
+    let response = await
+        fetch(requete,{
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+            },
+            body: data
+        })
+
+      if (response.ok) {
+        let jsonData = await response.json();
+        console.log("logAndDelDNL: fetch reponse ok = "+jsonData);
+          if (jsonData.error === 0)
+          {
+              appendLog("SID="+jsonData.sid);
+              //NASsid = obj.sid;
+              delDNL(jsonData.sid,hash);
+          }
   }
   else {
     appendLog("LDD SID "+NASsid+" already avaialble")
-    //delDNL(NASsid,hash);
   }
 }
+
 /* +++++++++++++++++++++++++++++++++
  Add download task using SID
 */
-function delDNL(sid,hash) {
+async function delDNL(sid,hash) {
     //var data = "sid="+sid+"&temp=Download&move=Multimedia%2FTemp&url=http%3A%2F%2Freleases.ubuntu.com%2F18.04%2Fubuntu-18.04.4-desktop-amd64.iso";
     appendLog("SID="+sid);
     appendLog("Hash="+hash);
 
     var data = "sid="+sid+"&hash="+hash;
+    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Remove";
+    appendLog("Request to send:"+requete);
 
-    var xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+    let response = await
+        fetch(requete,{
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+            },
+            body: data
+        })
 
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
-            appendLog(this.responseText);
-            var jsonData = JSON.parse(this.responseText);
-
+      if (response.ok) {
+        let jsonData = await response.json();
+        console.log("DelDNL: fetch reponse ok = "+jsonData);
+          if (jsonData.error === 0)
+          {
             appendLog("error:"+jsonData.error);
+
 
             appendLog("EndOfDel=>List (SID ="+sid+"  )")
             setTimeout( ListQNAPDNL, 500, sid);
+          }
       }
-
-    });
-
-    appendLog("Lancement QNAP Remove Task hash:"+hash);
-    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Task/Remove";
-    appendLog("Request to send:"+requete);
-    xhr.open("POST", requete);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-    appendLog(xhr);
-    xhr.send(data);
-
 }

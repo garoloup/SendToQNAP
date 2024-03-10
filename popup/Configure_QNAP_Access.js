@@ -145,51 +145,16 @@ function copyLogDivToClipboard() {
 
 document.querySelector("#copyLogs").addEventListener("click", copyLogDivToClipboard);
 
-
-/*==================
-function showMessage(msg)
-{
-  appendLog("Show msg: "+msg);
-  document.querySelector("#ErrMsg").textContent = msg;
-  chrome.browserAction.setBadgeText({text:"Msg"});
-
-}
-function clearMessage()
-{
-  appendLog("Clear msg");
-  document.querySelector("#ErrMsg").textContent = "";
-  chrome.browserAction.setBadgeText({text:""});
-}
-
-function showError(msg)
-{
-  appendLog("Show error: "+msg);
-  document.querySelector("#ErrMsg").textContent = msg;
-  chrome.browserAction.setBadgeText({text:"Err"});
-}
-
-function clearError()
-{
-  appendLog("Clear Error");
-  document.querySelector("#ErrMsg").textContent = "";
-  chrome.browserAction.setBadgeText({text:""});
-  document.querySelector("#NASpasswordLabel").style.color = "black";
-}
-*/
-
 //=================
 // Test NAS address & port 
 // Still using XHR API for timeout capability
 //=================
-function testConnection()
+async function testConnection()
 {
-  var xhr = new XMLHttpRequest();
-  xhr.withCredentials = true;
-
     clearError();
     clearPopupError();
 
-    chrome.storage.local.get(null,function(res) {
+    chrome.storage.local.get(null,async function(res) {
       var NASprotocol = "";
       var NASaddr = res.NASaddress;
       var NASport = res.NASport;
@@ -204,51 +169,81 @@ function testConnection()
       else {
         NASprotocol = "http";
       }
-      xhr.timeout = 2000;
 
     appendLog("settings "+res.NASsecure+" :"+NASprotocol+"://"+res.NASlogin+":"+res.NASpassword+"@"+res.NASaddress+":"+res.NASport+"/"+res.NASdir);
-        xhr.addEventListener("error", (e) => {
-          appendLog(e);
-          showError("Err");
-          showPopupError(e.message);//+": "+e.error.toString());
 
-        });
-        xhr.addEventListener("timeout", () => {
-          appendLog(NASaddr+" not responding");
-          showError("Err");
-          showPopupError(NASaddr+" not responding");//+": "+e.error.toString());
+    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/cgi-bin/authLogin.cgi";
+    appendLog("Request to send:"+requete);
 
-        });
-        xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
-          appendLog(this.responseText);
-          if (this.status === 200)
-          {
-            if (this.responseText != null && this.responseText.length > 0)
+    try {
+
+        let response = await
+            fetch(requete,{
+                method: 'GET',
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+                }
+            })
+
+          if (response.ok) {
+            let xmlData = await response.text();
+            console.log("testConnection: fetch reponse ok = "+xmlData);
+
+            if (xmlData != null && xmlData.length > 0)
             {
-  //            var jsonObject = xml2json(this.responseText,"");
-  //            var jsonObject = xml2json.parser(this.responseText);
-  //            var jsonObject = xmlToJson.parse(this.responseText);
+                let NASmodel ="";
+                let NASDisplayName = "";
+                let NASfirmware ="";
+                let NASHostname = "";
+                let NASIPinfo = "";
+                let NASWebPortInfo = "";
+                let NASPortInfo = "";
 
-              var jsonObject = xmlToJSON.parseString(this.responseText);
-              appendLog("json="+jsonObject);
+                var jsonObject = xmlToJSON.parseString(xmlData);
+                appendLog("json="+jsonObject);
 
-              let NASModel = jsonObject.QDocRoot[0].model[0].modelName[0]._text;
-              appendLog("model Name= "+NASModel);
+                if (jsonObject.hasOwnProperty('QDocRoot') &&
+                   jsonObject.QDocRoot[0].hasOwnProperty('model') &&
+                   jsonObject.QDocRoot[0].model[0].hasOwnProperty('modelName')) {
+                        NASModel = jsonObject.QDocRoot[0].model[0].modelName[0]._text;
+                        appendLog("model Name= "+NASModel);
+                    }
 
-              let NASDisplayName = jsonObject.QDocRoot[0].model[0].displayModelName[0]._text;
-              appendLog("model displayModelName= "+NASDisplayName);
+                if (jsonObject.hasOwnProperty('QDocRoot') &&
+                   jsonObject.QDocRoot[0].hasOwnProperty('model') &&
+                   jsonObject.QDocRoot[0].model[0].hasOwnProperty('displayModelName')) {
+                   NASDisplayName = jsonObject.QDocRoot[0].model[0].displayModelName[0]._text;
+                   appendLog("model displayModelName= "+NASDisplayName);
+                }
 
-              appendLog("fmwr version= "+jsonObject.QDocRoot[0].firmware[0].version[0]._text);
+                if (jsonObject.hasOwnProperty('QDocRoot') &&
+                   jsonObject.QDocRoot[0].hasOwnProperty('firmware')) {
+                    NASfirmware = jsonObject.QDocRoot[0].model[0]._text ;
+                  appendLog("fmwr version= "+jsonObject.QDocRoot[0].firmware[0].version[0]._text);
+                }
 
-              let NASHostname = jsonObject.QDocRoot[0].hostname[0]._text;
-              appendLog("hostname = "+NASHostname);
+                if (jsonObject.hasOwnProperty('QDocRoot') &&
+                   jsonObject.QDocRoot[0].hasOwnProperty('hostname')) {
+                    NASHostname = jsonObject.QDocRoot[0].hostname[0]._text;
+                    appendLog("hostname = "+NASHostname);
+                }
 
-              let NASIPinfo = jsonObject.QDocRoot[0].HTTPHost[0]._text;
-              appendLog("HTTP = "+NASIPinfo);
+               if (jsonObject.hasOwnProperty('QDocRoot') &&
+                   jsonObject.QDocRoot[0].hasOwnProperty('HTTPHost')) {
+                   NASIPinfo = jsonObject.QDocRoot[0].HTTPHost[0]._text;
+                   appendLog("HTTP = "+NASIPinfo);
+               }
 
-              let NASPortInfo = jsonObject.QDocRoot[0].webAccessPort[0]._text;
-              appendLog("port = "+NASPortInfo);
+               if (jsonObject.hasOwnProperty('QDocRoot') &&
+                   jsonObject.QDocRoot[0].hasOwnProperty('webAccessPort')) {
+                   NASWebPortInfo = jsonObject.QDocRoot[0].webAccessPort[0]._text;
+                   appendLog("web port = "+NASWebPortInfo);
+               }
+               if (jsonObject.hasOwnProperty('QDocRoot') &&
+                   jsonObject.QDocRoot[0].hasOwnProperty('stunnelport')) {
+                   NASPortInfo = jsonObject.QDocRoot[0].stunnelport[0]._text;
+                   appendLog("stunnel port = "+NASPortInfo);
+               }
               changeNASInfo(NASHostname+" "+NASDisplayName+" "+NASIPinfo+":"+NASPortInfo);
    
             }
@@ -257,27 +252,15 @@ function testConnection()
               showPopupError("Empty response from "+NASaddr);
             }
           }
-          else {
-            {
-              if (this.status === 404)
-                showPopupError("Err "+this.status +" Page not found "+NASaddr);
-              else  if (this.status === 500)
-                  showPopupError("Err "+this.status +" Server error of "+NASaddr);
-              else
-              showPopupError("Err "+this.status +" with "+NASaddr);
+        else {
+              showError("Err");
+              showPopupError("HTTP error "+ response.status + "response from "+NASaddr);
             }
-          }
-        }
-    });
-    var requete = NASprotocol+"://"+NASaddr+":"+NASport+"/cgi-bin/authLogin.cgi";
-    appendLog("Request to send:"+requete);
-    try {
-      xhr.open("GET", requete);
 
-      xhr.send();
     } catch (e) {
-      appendLog(e);
-      showPopupError(e.message);//+": "+e.error.toString());
+          appendLog(e);
+          showError("Err");
+          showPopupError(e.message);//+": "+e.error.toString());
     } finally {
 
     }

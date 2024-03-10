@@ -107,26 +107,6 @@ async function initialize() {
     await getSettings();
 
     console.log("initialize => settings: "+NASprotocol+" "+NASlogin+":"+NASpassword+"@"+NASaddr+":"+NASport+" temp="+NAStempdir+" move="+NASdir);
-    
-//    NASDNLNb = await getQNAPDNLNb(NASsid);
-//    console.log("initialize NASDNLNb"+NASDNLNb);
-//  var gettingAllStorageItems = browser.storage.local.get(null);
-//  chrome.storage.local.get(null,function(res) {
-//      NASaddr = res.NASaddress;
-//      NASport = res.NASport;
-//      NASlogin = res.NASlogin;
-//      NASpassword = res.NASpassword;
-//      NAStempdir = res.NAStempdir;
-//      NASdir = res.NASdir;
-//      NASsecure = res.NASsecure;
-//      if (NASsecure)
-//      {
-//        NASprotocol = "https";
-//      }
-//      else {
-//        NASprotocol = "http";
-//      }
-//  });
 }
 
 
@@ -174,38 +154,6 @@ function notifyExtension(url) {
   browser.runtime.sendMessage({"url": url});
 }
 
-
-/* +++++++++++++++++++++++++++++++++
-Login into NAS 
-*/
-// Moved to common.js
-/* WIP : replace with fetch and await 
-async function loginNAS()
-{
-  let data = "user="+NASlogin+"&pass="+btoa(NASpassword);
-  console.log("async loginNAS: param login ="+data);
-  let response = await fetch(NASprotocol+"://"+NASaddr+":"+NASport+"/downloadstation/V4/Misc/Login", {
-    method: 'POST',
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-    },
-    body: data,
-    credentials: 'include' 
-  })
-  let responseData = await response.json();
-  if (response.ok) {
-    console.log(this.responseData);
-    console.log("SID="+responseData.sid);//obj.sid);
-    NASsid = responseData.sid;//obj.sid;
-
-    return true;
-  }
-  else {
-    console.error("loginNAS failed "+response);
-    return false;
-  }
-
-}*/
 
 /* +++++++++++++++++++++++++++++++++
  Add download task using SID
