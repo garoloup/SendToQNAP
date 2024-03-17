@@ -1,6 +1,6 @@
 {
   "extensionName": {
-    "message": "DEV Send To QNAP",
+    "message": "Send To QNAP",
     "description": "Send download loink to QNAP download station."
   },
 
@@ -10,7 +10,7 @@
   },
 
   "menuContextSendLink": {
-    "message": "DEV Send Link to QNAP Download station",
+    "message": "Send Link to QNAP Download station",
     "description": "Send Link to QNAP Download station"
   }
     

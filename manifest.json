@@ -1,7 +1,7 @@
 {
 
   "manifest_version": 3,
-  "name": "DEV SendToQnap",
+  "name": "SendToQnap",
   "version": "2.8",
   "description": "Send a url to QNAP downloadstation",
   "default_locale": "en",
