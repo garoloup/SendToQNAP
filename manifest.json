@@ -1,15 +1,10 @@
 {
 
-  "manifest_version": 2,
-  "name": "SendToQnap",
-  "version": "2.7",
+  "manifest_version": 3,
+  "name": "DEV SendToQnap",
+  "version": "2.8",
   "description": "Send a url to QNAP downloadstation",
   "default_locale": "en",
-  "browser_specific_settings": {
-    "gecko": {
-      "strict_min_version": "57.0"
-    }
-  },
 
   "icons": {
     "32": "icons/32_download.png",
@@ -25,19 +20,16 @@
 "permissions": [
     "menus",
     "contextMenus",
-    "storage",
+    "storage"
+],
+
+"host_permissions": [
     "http://*/",
     "https://*/"
 ],
 
-"applications": {
-    "gecko": {
-      "id": "SendToQnap@SendToQnap.com"
-    }
-  },
 
-
-  "browser_action": {
+"action": {
     "default_icon": "icons/32_download.png",
     "default_title": "Send To QNAP",
     "default_popup": "popup/Configure_QNAP_Access.html"

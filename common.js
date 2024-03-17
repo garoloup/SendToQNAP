@@ -182,7 +182,7 @@ function showMessage(msg)
   appendLog(msg);
 // To replace with err storage as popup not present
 //      document.querySelector("#ErrMsg").textContent = msg;
-  chrome.browserAction.setBadgeText({text:msg});
+  chrome.action.setBadgeText({text:msg});
 //    getBadgeColor();
 
 
@@ -192,7 +192,7 @@ function showError(msg)
 {
   appendLog(msg);
 //      document.querySelector("#ErrMsg").textContent = msg;
-  chrome.browserAction.setBadgeText({text:msg});
+  chrome.action.setBadgeText({text:msg});
 //    getBadgeColor();
 
 
@@ -202,7 +202,7 @@ function clearError()
 {
   appendLog("Clear Error");
 //      document.querySelector("#ErrMsg").textContent = "";
-  chrome.browserAction.setBadgeText({text:""});
+  chrome.action.setBadgeText({text:""});
 //      document.querySelector("#NASpasswordLabel").style.color = "black";
 }
 
@@ -210,7 +210,7 @@ function clearMessage()
 {
   appendLog("Clear Message");
 //      document.querySelector("#ErrMsg").textContent = "";
-  chrome.browserAction.setBadgeText({text:""});
+  chrome.action.setBadgeText({text:""});
 //      document.querySelector("#NASpasswordLabel").style.color = "black";
 }
 
@@ -221,7 +221,7 @@ function clearMessage()
 //==================
 function getBadgeColor()
 {
-       chrome.browserAction.getBadgeBackgroundColor({},
+       chrome.action.getBadgeBackgroundColor({},
             function (color)
                 {
                 appendLog("getBadgeColor: color="+color);
@@ -233,27 +233,27 @@ function showPopupMessage(msg)
 {
   appendLog("Show msg: "+msg);
   document.querySelector("#ErrMsg").textContent = msg;
-  chrome.browserAction.setBadgeText({text:"Msg"});
+  chrome.action.setBadgeText({text:"Msg"});
 }
 function clearPopupMessage()
 {
   appendLog("Clear msg");
   document.querySelector("#ErrMsg").textContent = "";
-  chrome.browserAction.setBadgeText({text:""});
+  chrome.action.setBadgeText({text:""});
 }
 
 function showPopupError(msg)
 {
   appendLog("Show error: "+msg);
   document.querySelector("#ErrMsg").textContent = msg;
-  chrome.browserAction.setBadgeText({text:"Err"});
+  chrome.action.setBadgeText({text:"Err"});
 }
 
 function clearPopupError()
 {
   appendLog("Clear Error");
   document.querySelector("#ErrMsg").textContent = "";
-  chrome.browserAction.setBadgeText({text:""});
+  chrome.action.setBadgeText({text:""});
   document.querySelector("#NASpasswordLabel").style.color = "black";
 }
 
@@ -306,7 +306,7 @@ function startIndicator()
       }
 
     var imageData = context.getImageData(10, 10, 19, 19);
-      chrome.browserAction.setIcon({
+      chrome.action.setIcon({
         imageData: imageData
       });
 
@@ -346,7 +346,7 @@ function displayProgressIndicator(progressValue)
         context.stroke();
 
         var imageData = context.getImageData(0, 0, cW, cH);
-        chrome.browserAction.setIcon({
+        chrome.action.setIcon({
             imageData: imageData
           });
 
@@ -360,7 +360,7 @@ function displayProgressIndicator(progressValue)
 
 function makeBadgeTransparent()
 {
-    chrome.browserAction.getBadgeBackgroundColor({},
+    chrome.action.getBadgeBackgroundColor({},
             function (color)
                 {
                 appendLog("makeBadgeTransparent: color="+color);
@@ -369,13 +369,13 @@ function makeBadgeTransparent()
                         color[0]=217;
                     }
                 color[3] = 125;
-                chrome.browserAction.setBadgeBackgroundColor({color:color})
+                chrome.action.setBadgeBackgroundColor({color:color})
             });
 }
 
 function makeBadgeOpaque()
 {
-    chrome.browserAction.getBadgeBackgroundColor({},
+    chrome.action.getBadgeBackgroundColor({},
             function (color)
                 {
                 appendLog("makeBadgeOpaque: color="+color);
@@ -384,7 +384,7 @@ function makeBadgeOpaque()
                         color[0]=217;
                     }
                 color[3] = 255;
-                chrome.browserAction.setBadgeBackgroundColor({color:color})
+                chrome.action.setBadgeBackgroundColor({color:color})
             });
 }
 
@@ -395,10 +395,10 @@ function removeIndicator()
     //makeBadgeOpaque();
     
     appendLog("Stop Indicator")
-    chrome.browserAction.setIcon({
+    chrome.action.setIcon({
         path : "icons/32_download.png"
       });  
-    chrome.browserAction.setIcon({
+    chrome.action.setIcon({
         path : "icons/32_download.png",
         path : "icons/48_download.png"
       });  
